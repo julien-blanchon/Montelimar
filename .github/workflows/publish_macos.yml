@@ -10,6 +10,33 @@ on:
 # `tauri-action` will only build and upload the app bundles to the specified release.
 
 jobs:
+  get-version:
+    name: Get semantic versions
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.autogenerate-version.outputs.version_tag }}
+      current_version_tag: ${{ steps.get-current-version.outputs.current_version_tag}}
+      
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: get-current-version
+        run: |
+          CURRENT_VERSION_TAG=$(git tag --list --merged HEAD --sort=-version:refname "v*" | head -n 1)
+          echo "::set-output name=current_version_tag::${CURRENT_VERSION_TAG}"
+
+      - name: Auto-generate future version
+        id: autogenerate-version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(major)"
+          minor_pattern: "(minor)"
+          version_format: "${major}.${minor}.${patch}-pre${increment}"
+
   create-release:
     permissions:
       contents: write
@@ -55,6 +82,7 @@ jobs:
           bump_each_commit: false
           search_commit_body: true
           debug: true
+          
 
       - name: create release
         id: create-release
