@@ -14,6 +14,7 @@
 		"lint": "prettier --check . && eslint .",
 		"pretauri": "sh -c 'if bun run python:package:check | grep -q BUILD_NEEDED; then (bun run python:package:build; bun run python:package:reset); fi'",
 		"tauri": "tauri",
+		"version": "bun --eval 'import packageJson from \"./package.json\"; console.log(packageJson.version);'",
 		"python:package:build": "uvx --directory src-python --from box-packager box package && mkdir -p src-tauri/binaries && for file in src-python/target/release/*; do ext=${file##*.}; [ \"$file\" = \"$ext\" ] && ext=\"\" || ext=.$ext; dest=\"src-tauri/binaries/$(basename ${file%.*})-$(rustc -Vv | grep host | cut -f2 -d' ')$ext\"; cp -f \"$file\" \"$dest\"; chmod +x \"$dest\"; done",
 		"python:package:reset": "src-tauri/binaries/* self restore",
 		"python:package:check": "bun ./check_build_needed.mjs",
