@@ -7,8 +7,10 @@ mod model;
 mod state;
 mod utils;
 
-use app::spotlight::utils::WebviewWindowExt;
+#[allow(unused_imports)]
 use specta_typescript::Typescript;
+
+use app::spotlight::utils::WebviewWindowExt;
 use tauri::{Listener, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_specta::{collect_commands, Builder};
