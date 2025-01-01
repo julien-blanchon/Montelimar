@@ -63,6 +63,14 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "src-python/.python-version"
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
