@@ -9,11 +9,8 @@ mod utils;
 
 use app::spotlight::utils::WebviewWindowExt;
 use specta_typescript::Typescript;
-// use spotlight::windows::WebviewWindowExt;
 use tauri::{Listener, Manager};
 use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_http::reqwest::Client;
-use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 use tauri_specta::{collect_commands, Builder};
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
@@ -108,7 +105,7 @@ fn main() {
 
             let app_handle_clone = app_handle.clone();
             tauri::async_runtime::spawn(async {
-                if !commands::nougat::is_sidecar_nougat_running() {
+                if !commands::nougat::is_sidecar_nougat_running().await {
                     println!("Sidecar not running. Launching...");
                     commands::nougat::launch_sidecar_nougat(app_handle_clone).unwrap();
                 } else {

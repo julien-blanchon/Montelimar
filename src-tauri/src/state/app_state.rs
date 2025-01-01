@@ -1,5 +1,6 @@
 use std::sync::Mutex;
 
+#[allow(unused)]
 pub struct AppState {
     pub app_name: Mutex<String>,
 }
