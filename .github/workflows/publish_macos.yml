@@ -44,8 +44,17 @@ jobs:
         with:
           bun-version: latest
 
-      - name: get version
-        run: echo "PACKAGE_VERSION=$(bun --eval 'import packageJson from \"./package.json\"; console.log(packageJson.version);')" >> $GITHUB_ENV
+      - name: Manage semantic versioning
+        id: calculate_tag_version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "[MAJOR]"
+          minor_pattern: "[MINOR]"
+          version_format: "${major}.${minor}.${patch}"
+          bump_each_commit: false
+          search_commit_body: true
+          debug: true
 
       - name: create release
         id: create-release
@@ -55,8 +64,8 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `app-v${process.env.PACKAGE_VERSION}`,
-              name: `Montelimar App v${process.env.PACKAGE_VERSION}`,
+              tag_name: `app-v${{steps.calculate_tag_version.outputs.version_tag}}`,
+              name: `Montelimar App v${{steps.calculate_tag_version.outputs.version_tag}}`,
               body: 'Take a look at the assets to download and install this app.',
               draft: true,
               prerelease: false
