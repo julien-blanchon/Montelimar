@@ -1,6 +1,9 @@
 name: "publish_macos"
 
-on: pull_request
+on:
+  push:
+    branches:
+      - release
 
 # `tauri-action` can also upload app bundles to an existing GitHub release.
 # This workflow uses different actions to create and publish the release.
@@ -82,7 +85,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tagName: app-v__VERSION__
           releaseId: ${{ needs.create-release.outputs.release_id }}
+          releaseName: 'Montelimar App v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
           args: ${{ matrix.args }}
 
   publish-release:
