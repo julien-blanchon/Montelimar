@@ -77,6 +77,11 @@ jobs:
           cd src-python
           uv sync
 
+      - name: "Install Hatch"
+        uses: pypa/hatch@64031c1cf5d02d85203f68cb7a4fd5db2aa7a004
+        with:
+          hatch-version: latest
+
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
