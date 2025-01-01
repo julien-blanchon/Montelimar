@@ -75,12 +75,10 @@ jobs:
       - name: "Install the project"
         run: |
           cd src-python
+          uv venv
+          source .venv/bin/activate
           uv sync
-
-      - name: "Install Hatch"
-        uses: pypa/hatch@64031c1cf5d02d85203f68cb7a4fd5db2aa7a004
-        with:
-          hatch-version: latest
+          uv pip install --system hatch
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
