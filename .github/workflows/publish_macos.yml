@@ -26,7 +26,7 @@ jobs:
         id: get-current-version
         run: |
           CURRENT_VERSION_TAG=$(git tag --list --merged HEAD --sort=-version:refname "v*" | head -n 1)
-          echo "::set-output name=current_version_tag::${CURRENT_VERSION_TAG}"
+          echo "current_version_tag=${CURRENT_VERSION_TAG}" >> $GITHUB_OUTPUT
 
       - name: Auto-generate future version
         id: autogenerate-version
