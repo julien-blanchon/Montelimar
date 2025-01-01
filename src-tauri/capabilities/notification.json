@@ -1,0 +1,25 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "notification",
+    "description": "Notification Management",
+    "platforms": ["macOS"],
+    "windows": ["*"],
+    "permissions": [
+        "notification:allow-delete-channel",
+        "notification:allow-is-permission-granted",
+        "notification:allow-list-channels",
+        "notification:allow-create-channel",
+        "notification:allow-cancel",
+        "notification:allow-register-listener",
+        "notification:allow-notify",
+        "notification:allow-show",
+        "notification:allow-request-permission",
+        "notification:allow-permission-state",
+        "notification:allow-remove-active",
+        "notification:allow-batch",
+        "notification:allow-get-active",
+        "notification:allow-register-action-types",
+        "notification:allow-get-pending",
+        "notification:allow-check-permissions"
+    ]
+  }

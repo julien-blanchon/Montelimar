@@ -11,6 +11,10 @@ A OCR toolbox integrated in your mac
 
 
 [![Apache 2 License](https://img.shields.io/badge/License-Apache-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Tauri](https://img.shields.io/badge/Tauri-2-blue.svg)](https://tauri.app)
+[![Svelte](https://img.shields.io/badge/Svelte-5-orange.svg)](https://svelte.dev)
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
+[![Rust](https://img.shields.io/badge/Rust-2021-orange.svg)](https://www.rust-lang.org)
 
 ## Preview
 

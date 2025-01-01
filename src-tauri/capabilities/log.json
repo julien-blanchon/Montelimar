@@ -1,0 +1,14 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "log",
+    "description": "Log",
+    "platforms": [
+        "macOS"
+    ],
+    "windows": [
+        "*"
+    ],
+    "permissions": [
+        "log:allow-log"
+    ]
+}

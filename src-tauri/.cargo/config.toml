@@ -1,0 +1,31 @@
+# Build in release mode to avoid long compilation times
+[profile.dev.package.ocrs]
+opt-level = 3
+debug = false
+
+
+# Build in release mode to avoid long compilation times
+[profile.dev.package.rten]
+opt-level = 3
+debug = false
+
+
+# Build in release mode to avoid long compilation times
+[profile.dev.package.rten_imageproc]
+opt-level = 3
+debug = false
+
+# Build in release mode to avoid long compilation times
+[profile.dev.package.rten_simd]
+opt-level = 3
+debug = false
+
+# Build in release mode to avoid long compilation times
+[profile.dev.package.rten_tensor]
+opt-level = 3
+debug = false
+
+# Build in release mode to avoid long compilation times
+[profile.dev.package.rten_vecmath]
+opt-level = 3
+debug = false

@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    /* @apply cursor-default; */
+    @apply select-none;
+    @apply touch-none;
+    @apply overscroll-none
+  }
+
+  /* For .p .div .span .h1 .h2 .h3 .h4 .h5 .h6 ... don't apply cursor-default to disable text selection */
+  p,
+  div,
+  span,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply cursor-default;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  *:focus {
+		outline: none;
+	}
+
+  [data-tauri-drag-region] {
+    @apply cursor-grab;
+  }
+
+  /* [data-tauri-drag-region]:hover {
+    @apply cursor-grabbing;
+  } */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.btn:focus, /* Some component like file input need this. */
+.btn:focus-visible {
+  outline-style:solid;
+  outline-width:2px;
+  outline-offset:0px;
+}
+

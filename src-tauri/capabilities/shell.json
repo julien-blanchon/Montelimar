@@ -1,0 +1,58 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "shell",
+    "description": "Shell",
+    "platforms": [
+        "macOS"
+    ],
+    "windows": [
+        "*"
+    ],
+    "permissions": [
+        "shell:allow-execute",
+        "shell:allow-stdin-write",
+        "shell:allow-open",
+        "shell:allow-kill",
+        "shell:allow-spawn",
+        {
+            "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "args": true,
+                    "cmd": "/usr/sbin/screencapture",
+                    "name": "/usr/sbin/screencapture"
+                }
+            ]
+        },
+        {
+            "identifier": "shell:allow-spawn",
+            "allow": [
+                {
+                    "args": true,
+                    "cmd": "/usr/sbin/screencapture",
+                    "name": "/usr/sbin/screencapture"
+                }
+            ]
+        },
+        {
+            "identifier": "shell:allow-open",
+            "allow": [
+                {
+                    "args": true,
+                    "cmd": "/usr/sbin/screencapture",
+                    "name": "/usr/sbin/screencapture"
+                }
+            ]
+        },
+        {
+            "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "args": true,
+                    "name": "binaries/ocr_mlx",
+                    "sidecar": true
+                }
+            ]
+        }
+    ]
+}

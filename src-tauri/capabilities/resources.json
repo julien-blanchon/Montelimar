@@ -1,0 +1,10 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "resources",
+    "description": "resources",
+    "platforms": ["macOS"],
+    "windows": ["*"],
+    "permissions": [
+        "core:resources:allow-close"
+    ]
+}

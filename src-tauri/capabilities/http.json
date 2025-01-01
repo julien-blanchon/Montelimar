@@ -1,0 +1,48 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "http",
+    "description": "HTTP",
+    "platforms": [
+        "macOS"
+    ],
+    "windows": ["*"],
+    "permissions": [
+        "http:allow-fetch",
+        "http:allow-fetch-cancel",
+        "http:allow-fetch-send",
+        "http:allow-fetch-read-body",
+        {
+            "identifier": "http:allow-fetch",
+            "allow": [
+                {
+                    "url": "http://*:*"
+                },
+                {
+                    "url": "https://*:*"
+                }
+            ]
+        },
+        {
+            "identifier": "http:allow-fetch-send",
+            "allow": [
+                {
+                    "url": "http://*:*"
+                },
+                {
+                    "url": "https://*:*"
+                }
+            ]
+        },
+        {
+            "identifier": "http:allow-fetch-read-body",
+            "allow": [
+                {
+                    "url": "http://*:*"
+                },
+                {
+                    "url": "https://*:*"
+                }
+            ]
+        }
+    ]
+}

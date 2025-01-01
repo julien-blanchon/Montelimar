@@ -1,0 +1,14 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "image",
+    "description": "Image",
+    "platforms": ["macOS"],
+    "windows": ["*"],
+    "permissions": [
+        "core:image:allow-from-bytes",
+        "core:image:allow-from-path",
+        "core:image:allow-size",
+        "core:image:allow-rgba",
+        "core:image:allow-new"
+    ]
+}

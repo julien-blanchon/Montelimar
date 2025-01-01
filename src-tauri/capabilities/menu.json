@@ -1,0 +1,35 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "menu",
+    "description": "Menu",
+    "platforms": [
+        "macOS"
+    ],
+    "windows": [
+        "*"
+    ],
+    "permissions": [
+        "core:menu:allow-items",
+        "core:menu:allow-is-checked",
+        "core:menu:allow-set-text",
+        "core:menu:allow-set-icon",
+        "core:menu:allow-set-enabled",
+        "core:menu:allow-set-as-help-menu-for-nsapp",
+        "core:menu:allow-set-as-windows-menu-for-nsapp",
+        "core:menu:allow-remove-at",
+        "core:menu:allow-prepend",
+        "core:menu:allow-insert",
+        "core:menu:allow-create-default",
+        "core:menu:allow-set-as-window-menu",
+        "core:menu:allow-set-as-app-menu",
+        "core:menu:allow-remove",
+        "core:menu:allow-set-accelerator",
+        "core:menu:allow-popup",
+        "core:menu:allow-new",
+        "core:menu:allow-get",
+        "core:menu:allow-set-checked",
+        "core:menu:allow-text",
+        "core:menu:allow-append",
+        "core:menu:allow-is-enabled"
+    ]
+}

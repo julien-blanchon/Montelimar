@@ -1,0 +1,16 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "app",
+    "description": "App",
+    "platforms": ["macOS"],
+    "windows": ["*"],
+    "permissions": [
+        "core:app:allow-default-window-icon",
+        "core:app:allow-name",
+        "core:app:allow-app-show",
+        "core:app:allow-version",
+        "core:app:allow-tauri-version",
+        "core:app:allow-app-hide",
+        "core:app:allow-set-app-theme"
+    ]
+}

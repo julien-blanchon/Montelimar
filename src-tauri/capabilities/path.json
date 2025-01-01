@@ -1,0 +1,17 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "path",
+    "description": "Path",
+    "platforms": ["macOS"],
+    "windows": ["*"],
+    "permissions": [
+        "core:path:allow-basename",
+        "core:path:allow-join",
+        "core:path:allow-extname",
+        "core:path:allow-dirname",
+        "core:path:allow-normalize",
+        "core:path:allow-resolve-directory",
+        "core:path:allow-is-absolute",
+        "core:path:allow-resolve"
+    ]
+}

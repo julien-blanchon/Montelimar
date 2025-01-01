@@ -1,0 +1,49 @@
+[project]
+name = "ocr_mlx"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Julien Blanchon", email = "julien@blanchon.cc" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.11.0",
+    "fastapi[standard]>=0.115.6",
+    "huggingface-hub[hf-transfer]>=0.27.0",
+    "mlx>=0.21.1",
+    "pillow>=11.0.0",
+    "pydantic>=2.10.4",
+    "requests>=2.32.3",
+    "transformers>=4.47.1",
+    "typer>=0.15.1",
+]
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ocr_mlx"]
+
+[project.scripts]
+ocr_mlx = "ocr_mlx.endpoint:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+
+[dependency-groups]
+dev = [
+    "box-packager>=0.4.0",
+]
+
+[tool.box]
+builder = "hatch"
+is_gui = false
+app_entry = "ocr_mlx.endpoint:main"
+entry_type = "spec"
+python_version = "3.12"
+
+[tool.box.env-vars]
+PYAPP_UV_ENABLED = "true"
+PYAPP_EXPOSE_METADATA = "false"

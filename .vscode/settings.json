@@ -1,0 +1,6 @@
+{
+  "svelte.enable-ts-plugin": true,
+  "rust-analyzer.cargo.extraEnv": {
+    "MACOSX_DEPLOYMENT_TARGET": "14.6"
+  }
+}
