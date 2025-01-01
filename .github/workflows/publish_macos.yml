@@ -72,6 +72,11 @@ jobs:
         with:
           python-version-file: "src-python/.python-version"
 
+      - name: "Install the project"
+        run: |
+          cd src-python
+          uv sync
+
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
