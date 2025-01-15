@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "apscheduler>=3.11.0",
     "fastapi[standard]>=0.115.6",
+    "hatch>=1.14.0",
     "huggingface-hub[hf-transfer]>=0.27.0",
     "mlx>=0.21.1",
     "pillow>=11.0.0",
@@ -25,6 +26,11 @@ packages = ["src/ocr_mlx"]
 
 [project.scripts]
 ocr_mlx = "ocr_mlx.endpoint:main"
+
+[project.optional-dependencies]
+packaging = [
+    "box-packager>=0.4.0",
+]
 
 [build-system]
 requires = ["hatchling"]
