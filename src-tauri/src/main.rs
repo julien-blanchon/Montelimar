@@ -107,7 +107,7 @@ fn main() {
 
             let app_handle_clone = app_handle.clone();
             tauri::async_runtime::spawn(async {
-                if !commands::nougat::is_sidecar_nougat_running().await {
+                if !commands::nougat::is_sidecar_nougat_running() {
                     println!("Sidecar not running. Launching...");
                     commands::nougat::launch_sidecar_nougat(app_handle_clone).unwrap();
                 } else {
