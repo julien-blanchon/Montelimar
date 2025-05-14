@@ -221,11 +221,6 @@
 												}}
 												class="group/copy flex h-1/2 w-full items-center justify-center gap-2 rounded-t-md bg-blue-500/10 p-2 transition-colors hover:bg-blue-500/20 active:bg-blue-500/40"
 											>
-												<!-- <Icon
-													icon="fluent:copy-24-filled"
-													class="text-blue-500 transition-transform duration-100 ease-out group-active/copy:rotate-180 group-active/copy:scale-125"
-													height={24}
-												/> -->
 												<Copy
 													class="size-5 text-blue-500 transition-transform duration-100 ease-out group-active/copy:rotate-180 group-active/copy:scale-125"
 												/>
@@ -239,14 +234,7 @@
 												}}
 												class="group/delete flex h-1/2 w-full items-center justify-center gap-2 rounded-b-md bg-red-500/10 p-2 transition-colors hover:bg-red-500/20 active:bg-red-500/40"
 											>
-												<!-- <Icon
-													icon="fluent:bin-recycle-24-filled"
-													class="text-red-500 transition-transform duration-100 ease-out group-active/delete:rotate-180 group-active/delete:scale-125"
-													height={24}
-												/> -->
-												<Trash2
-													class="size-5 text-red-500 transition-transform duration-100 ease-out group-active/delete:rotate-180 group-active/delete:scale-125"
-												/>
+												<Trash2 class="size-5 text-red-500 " />
 											</button>
 										</div>
 									{:else}
@@ -260,14 +248,7 @@
 												}}
 												class="group/delete flex h-full w-full items-center justify-center gap-2 rounded-b-md bg-red-500/10 p-2 transition-colors hover:bg-red-500/20 active:bg-red-500/40"
 											>
-												<!-- <Icon
-													icon="fluent:bin-recycle-24-filled"
-													class="text-red-500 transition-transform duration-100 ease-out group-active/delete:rotate-180 group-active/delete:scale-125"
-													height={24}
-												/> -->
-												<Trash2
-													class="size-5 text-red-500 transition-transform duration-100 ease-out group-active/delete:rotate-180 group-active/delete:scale-125"
-												/>
+												<Trash2 class="size-5 text-red-500 " />
 											</button>
 										</div>
 									{/if}

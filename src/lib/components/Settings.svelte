@@ -24,13 +24,12 @@
 	import LogosRustIcon from './icon/logos--rust.svg.svelte';
 	import LogosTailwindcssIcon from './icon/logos--tailwindcss-icon.svg.svelte';
 	import { cn } from '@/utils';
-	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
+	import { dndzone } from 'svelte-dnd-action';
 	import InputShortcut from '@/components/custom/InputShortcut.svelte';
 	import { formatShortcut } from '@/shortcut';
 	import { fade, scale, slide } from 'svelte/transition';
 	import { requestPermission } from '@tauri-apps/plugin-notification';
 	import { systemSettings } from '@/runes/system_settings.svelte';
-	import { commands } from '@/tauri/bindings';
 	import Confetti from './custom/Confetti.svelte';
 	import ToggleConfetti from './custom/ToggleConfetti.svelte';
 
@@ -201,6 +200,7 @@
 				<div class="flex gap-2">
 					<button
 						class={cn(
+							'group',
 							'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
 							'border border-base-300 bg-base-200/50 hover:bg-base-300/80',
 							'disabled:cursor-not-allowed disabled:opacity-50',
@@ -217,11 +217,12 @@
 						}}
 						disabled={isAddingNew && !isNougatConfig}
 					>
-						<FileText class="size-4 text-base-content/70" />
+						<FileText class="size-4 text-base-content/70 group-data-[active=true]:text-primary" />
 						Add Nougat
 					</button>
 					<button
 						class={cn(
+							'group',
 							'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
 							'border border-base-300 bg-base-200/50 hover:bg-base-300/80',
 							'disabled:cursor-not-allowed disabled:opacity-50',
@@ -238,7 +239,7 @@
 						}}
 						disabled={isAddingNew && isNougatConfig}
 					>
-						<Camera class="size-4 text-base-content/70" />
+						<Camera class="size-4 text-base-content/70 group-data-[active=true]:text-primary" />
 						Add OCRs
 					</button>
 				</div>

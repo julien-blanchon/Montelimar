@@ -15,10 +15,10 @@ pub fn launch_sidecar_nougat(handle: tauri::AppHandle) -> Result<String, String>
 #[tauri::command]
 #[specta::specta]
 pub fn is_sidecar_nougat_running() -> bool {
-    // client.get("http://127.0.0.1:8008/health")
+    // client.get("http://127.0.0.1:7771/health")
     let client = Client::new();
     let response = tokio::runtime::Runtime::new()
         .unwrap()
-        .block_on(client.get("http://127.0.0.1:8008/health").send());
+        .block_on(client.get("http://127.0.0.1:7771/health").send());
     response.is_ok()
 }

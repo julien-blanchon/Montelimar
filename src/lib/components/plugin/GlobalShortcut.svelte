@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ShortcutKey } from '@/types';
 	import { isRegistered, register, unregister } from '@tauri-apps/plugin-global-shortcut';
+	import { recordingState } from '@/runes/recordingState.svelte';
 
 	interface Props {
 		globalShortcut: ShortcutKey | null;
@@ -30,6 +31,10 @@
 					await register(shortcut, (event) => {
 						if (event.state === 'Pressed') {
 							console.log('Shortcut triggered', event);
+							if (recordingState.state) {
+								recordingState.state = false;
+								return;
+							}
 							callback();
 						}
 					});

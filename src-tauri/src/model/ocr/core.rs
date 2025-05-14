@@ -75,7 +75,6 @@ pub fn run_ocr(
     decode_method: DecodeMethod,
     allowed_chars: Option<String>,
 ) -> Result<String> {
-    println!("hello");
     info!("[Models] Loading detection and recognition models...");
     let detection_model = load_model(detection_model).context("Failed to load detection model")?;
     info!("[Models] ✓ Detection model loaded successfully");

@@ -1,4 +1,4 @@
-<script module>
+<script module lang="ts">
 	export interface ConfettiProps {
 		size?: number;
 		x?: [number, number];
