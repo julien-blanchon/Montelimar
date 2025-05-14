@@ -81,6 +81,7 @@
 		"@tauri-apps/plugin-shell": "~2.0.1",
 		"@tauri-apps/plugin-sql": "~2.2.0",
 		"@tauri-apps/plugin-store": "~2.2.0",
+		"@tauri-apps/plugin-updater": "~2",
 		"better-sqlite3": "^11.10.0",
 		"drizzle-orm": "^0.38.4",
 		"tauri-plugin-svelte": "^0.1.4"

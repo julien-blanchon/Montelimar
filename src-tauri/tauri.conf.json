@@ -18,6 +18,7 @@
     "longDescription": "Montelimar is an OCR tool that allows you screenshot and extract text from images",
     "shortDescription": "Montelimar is an OCR tool that allows you screenshot and extract text from images",
     "publisher": "Julien Blanchon",
+    "createUpdaterArtifacts": true,
     "macOS": {
       "dmg": {
         "appPosition": {
@@ -37,7 +38,10 @@
       "hardenedRuntime": true,
       "minimumSystemVersion": "10.13"
     },
-    "targets": ["dmg", "app"],
+    "targets": [
+      "dmg",
+      "app"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -46,9 +50,18 @@
       "icons/icon.ico"
     ],
     "resources": [],
-    "externalBin": ["binaries/ocr_mlx"]
+    "externalBin": [
+      "binaries/ocr_mlx"
+    ]
   },
-  "plugins": {},
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZBRDQxRjc1RkM4MzM3N0MKUldSOE40UDhkUi9VYXRIYzNaVVY4SjJlOUY1U3NySzFrMXBPQTJRM3pyUHk0d2R6MklnYVN3dnUK",
+      "endpoints": [
+        "https://github.com/julien-blanchon/Montelimar/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "app": {
     "windows": [
       {
