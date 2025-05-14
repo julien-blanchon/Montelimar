@@ -109,7 +109,7 @@ jobs:
       - name: Install Frontend Dependencies
         run: bun install
 
-      - uses: tauri-apps/tauri-action@v0.5.18
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: true
