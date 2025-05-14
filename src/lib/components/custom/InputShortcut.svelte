@@ -3,6 +3,7 @@
 	import { X } from 'lucide-svelte';
 	import { cn } from '@/utils';
 	import { formatShortcut } from '@/shortcut';
+	import { recordingState } from '@/runes/recordingState.svelte';
 
 	interface Props {
 		value: ShortcutKey | null;
@@ -11,7 +12,6 @@
 	}
 
 	let { value = $bindable(), placeholder = 'Click to set', disabled = false }: Props = $props();
-	let isRecording = $state(false);
 	let inputRef: HTMLInputElement;
 
 	let displayValue = $derived.by(() => {
@@ -20,12 +20,12 @@
 
 	function startRecording() {
 		if (disabled) return;
-		isRecording = true;
+		recordingState.state = true;
 		inputRef?.focus();
 	}
 
 	function stopRecording() {
-		isRecording = false;
+		recordingState.state = false;
 		inputRef?.blur();
 	}
 
@@ -34,7 +34,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (!isRecording) return;
+		if (!recordingState) return;
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -69,17 +69,18 @@
 	}
 </script>
 
-<div class="flex w-[10rem] w-full flex-col gap-1">
+<div class="flex w-[10rem] flex-col gap-1">
 	<div class="flex items-center justify-between gap-2">
 		<input
 			bind:this={inputRef}
 			type="text"
 			{placeholder}
-			class={cn(
+			class={[
 				'h-9 w-full rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors focus:border-primary/20 focus:bg-base-100',
-				isRecording && 'input-primary animate-pulse ring-2 ring-primary/20 ring-offset-1'
-			)}
-			value={isRecording ? 'Recording...' : displayValue}
+				'data-[is-recording=true]:input-primary data-[is-recording=true]:animate-pulse data-[is-recording=true]:ring-2 data-[is-recording=true]:ring-primary/20 data-[is-recording=true]:ring-offset-1'
+			]}
+			value={recordingState.state ? 'Recording...' : displayValue}
+			data-is-recording={recordingState.state}
 			onclick={startRecording}
 			onkeydown={handleKeyDown}
 			onblur={handleBlur}

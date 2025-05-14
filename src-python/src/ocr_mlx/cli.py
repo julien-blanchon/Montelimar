@@ -38,7 +38,7 @@ def main() -> str:
 
     logger.info(f"Loading model: {args.model}")  # noqa: G004
     nougat_processor = NougatProcessor.from_pretrained(args.model)
-    nougat_processor = cast(NougatProcessor, nougat_processor)
+    nougat_processor = cast("NougatProcessor", nougat_processor)
     model = Nougat.from_pretrained(args.model)
 
     images = [load_image(args.input)]
@@ -74,6 +74,16 @@ def main() -> str:
         logger.info(f"Results saved to {args.output}")  # noqa: G004
 
     return output_text
+
+
+from typing import no_type_check
+
+
+@no_type_check
+def test_bad_typed_stuff():
+    x = "not an int"
+    y = x + 1
+    y.format()
 
 
 if __name__ == "__main__":

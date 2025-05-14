@@ -27,7 +27,7 @@ from ocr_mlx.model.nougat import Nougat
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-DEFAULT_PORT_API = 8008
+DEFAULT_PORT_API = 7771
 
 
 def is_port_available(port):
@@ -79,7 +79,7 @@ class ModelCacheState:
             logger.info("Loading model: %s", model_name)
             self.model = Nougat.from_pretrained(model_name)
             self.processor = cast(
-                NougatProcessor, NougatProcessor.from_pretrained(model_name)
+                "NougatProcessor", NougatProcessor.from_pretrained(model_name)
             )
             self.model_name = model_name
         try:

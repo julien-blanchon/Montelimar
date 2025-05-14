@@ -7,7 +7,7 @@ import { TrayIcon } from "@tauri-apps/api/tray";
 import { changeTrayWithEasing } from "./tray";
 import { linear } from "svelte/easing";
 
-function arrayBufferToBase64(img: ArrayBuffer) {
+function arrayBufferToBase64(img: Uint8Array) {
     return btoa(new Uint8Array(img).reduce((data, byte) => data + String.fromCharCode(byte), ''));
 }
 
@@ -58,7 +58,7 @@ export async function requestScreenShot(filename: string, playSound: boolean): P
 }
 
 export async function runNougat(config: ConfigNougat, base64: string): Promise<string> {
-    const response = await fetch('http://127.0.0.1:8008/ocr', {
+    const response = await fetch('http://127.0.0.1:7771/ocr', {
         method: 'POST',
         headers: {
             accept: 'text/plain',
