@@ -163,6 +163,17 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
 
+      - name: Upload .dmg and .app to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: matrix.platform == 'macos-latest'
+        with:
+          tag_name: app-v${{ needs.get-version.outputs.version_tag }}
+          files: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/app/*.app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   publish-release:
     permissions:
       contents: write
