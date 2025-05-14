@@ -35,8 +35,7 @@
       },
       "files": {},
       "hardenedRuntime": true,
-      "minimumSystemVersion": "10.13",
-      "signingIdentity": "-"
+      "minimumSystemVersion": "10.13"
     },
     "targets": ["dmg", "app"],
     "icon": [
