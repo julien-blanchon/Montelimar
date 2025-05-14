@@ -52,7 +52,7 @@ jobs:
           major_pattern: "[MAJOR]"
           minor_pattern: "[MINOR]"
           version_format: "${major}.${minor}.${patch}"
-          bump_each_commit: false
+          bump_each_commit: true
           search_commit_body: true
           debug: true
 
