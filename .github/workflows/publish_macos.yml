@@ -1,37 +1,13 @@
 name: "publish_macos"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - release
 
 jobs:
-  get-version:
-    name: Get semantic versions
-    runs-on: ubuntu-latest
-    outputs:
-      version_tag: ${{ steps.autogenerate-version.outputs.version_tag }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Auto-generate future version
-        id: autogenerate-version
-        uses: paulhatch/semantic-version@v5.4.0
-        with:
-          tag_prefix: "v"
-          major_pattern: "[MAJOR]"
-          minor_pattern: "[MINOR]"
-          version_format: "${major}.${minor}.${patch}"
-          bump_each_commit: true
-          search_commit_body: true
-          debug: true
-
   build-tauri:
-    name: Build & Publish macOS Tauri App
-    needs: [get-version]
     permissions:
       contents: write
     strategy:
@@ -40,7 +16,14 @@ jobs:
         include:
           - platform: "macos-latest"
             args: "--target aarch64-apple-darwin"
-            arch: "silicon"
+            arch: 'silicon'
+          # - platform: 'macos-latest' # for Intel based macs.
+          #   args: '--target x86_64-apple-darwin'
+          #   arch: 'intel'
+          # - platform: 'ubuntu-22.04'
+          #   args: ''
+          # - platform: 'windows-latest'
+          #   args: ''
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -112,22 +95,26 @@ jobs:
           uv sync
           uv pip install --system hatch
 
-      - name: Install Rust
+      - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Install frontend dependencies
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install Frontend Dependencies
         run: bun install
 
-      - name: Build and publish with Tauri
-        uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
         with:
-          tagName: app-v${{ needs.get-version.outputs.version_tag }}
-          releaseName: 'Montelimar App v${{ needs.get-version.outputs.version_tag }}'
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'Montelimar App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
