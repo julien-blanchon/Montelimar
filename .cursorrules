@@ -391,7 +391,6 @@ Key Principles:
 - Follow Svelte's naming conventions (PascalCase for components, camelCase for variables and functions).
   
 Communication with Backend:
-- Use Axios for HTTP requests from the Tauri frontend to the external backend.
 - Implement proper error handling for network requests and responses.
 - Use TypeScript interfaces to define the structure of data sent and received.
 - Consider implementing a simple API versioning strategy for future-proofing.
@@ -430,7 +429,6 @@ Dependencies:
 - Svelte
 - TypeScript
 - Vite
-- Axios
 
 Refer to official documentation for Tauri, Svelte, and TypeScript for best practices and up-to-date APIs.
 When working with the external Python backend:

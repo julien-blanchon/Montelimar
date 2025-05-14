@@ -23,6 +23,7 @@ enum Error {
 pub trait WebviewWindowExt {
     fn to_spotlight_panel(&self) -> tauri::Result<Panel>;
 
+    #[allow(unused)]
     fn center_at_cursor_monitor(&self) -> tauri::Result<()>;
 }
 
