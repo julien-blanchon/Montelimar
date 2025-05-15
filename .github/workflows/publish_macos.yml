@@ -132,3 +132,62 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+  
+  publish-to-cask:
+    needs: build-tauri
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tap repo
+        uses: actions/checkout@v4
+        with:
+          repository: julien-blanchon/homebrew-tap
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: tap-repo
+
+      - name: Download Release Asset
+        run: |
+          mkdir dist
+          gh release download "app-v__VERSION__" \
+            --repo julien-blanchon/Montelimar \
+            --pattern "*aarch64.app.tar.gz" \
+            --dir dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute SHA256
+        id: shasum
+        run: |
+          FILE_PATH=$(find dist -name "*.tar.gz")
+          SHA=$(shasum -a 256 "$FILE_PATH" | awk '{print $1}')
+          echo "sha256=$SHA" >> $GITHUB_OUTPUT
+          echo "file_name=$(basename "$FILE_PATH")" >> $GITHUB_OUTPUT
+
+      - name: Update Cask
+        run: |
+          VERSION=$(basename "${{ steps.shasum.outputs.file_name }}" | sed -E 's/.*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          DOWNLOAD_URL="https://github.com/julien-blanchon/Montelimar/releases/download/app-v${VERSION}/${{ steps.shasum.outputs.file_name }}"
+          CASK_PATH="tap-repo/Casks/montelimar.rb"
+
+          echo "Generating cask for version $VERSION..."
+          echo "Download URL: $DOWNLOAD_URL"
+
+          echo "cask \"montelimar\" do" > "$CASK_PATH"
+          echo "  version \"$VERSION\"" >> "$CASK_PATH"
+          echo "  sha256 \"${{ steps.shasum.outputs.sha256 }}\"" >> "$CASK_PATH"
+          echo "" >> "$CASK_PATH"
+          echo "  url \"$DOWNLOAD_URL\"," >> "$CASK_PATH"
+          echo "      verified: \"github.com/julien-blanchon/Montelimar/\"" >> "$CASK_PATH"
+          echo "" >> "$CASK_PATH"
+          echo "  name \"Montelimar\"" >> "$CASK_PATH"
+          echo "  desc \"AI-powered desktop app built with Tauri\"" >> "$CASK_PATH"
+          echo "  homepage \"https://github.com/julien-blanchon/Montelimar\"" >> "$CASK_PATH"
+          echo "" >> "$CASK_PATH"
+          echo "  app \"Montelimar.app\"" >> "$CASK_PATH"
+          echo "end" >> "$CASK_PATH"
+
+          cd tap-repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Casks/montelimar.rb
+          git commit -m "Update Montelimar cask to v$VERSION"
+          git push origin main
