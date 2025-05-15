@@ -22,7 +22,7 @@ tauri = { version = "2.0.0-rc.8", features = [
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 serde = { version = "1.0.200", features = ["derive"] }
 serde_json = "1.0.116"
-thiserror = "2.0.9"
+thiserror = "2.0.12"
 anyhow = "1.0.95"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 url = "2.5.4"
@@ -30,9 +30,9 @@ log = "0.4"
 env_logger = "0.11.6"
 ureq = "2.11.0"
 home = "0.5.9"
-specta = "=2.0.0-rc.20"
-specta-typescript = "0.0.7"
-tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }
+specta = "2.0.0-rc.21"
+specta-typescript = "0.0.9"
+tauri-specta = { version = "2.0.0-rc.21", features = ["derive", "typescript"] }
 tauri-plugin-shell = "2"
 tauri-plugin-clipboard-manager = "2.0.2"
 tauri-plugin-fs = "2"
@@ -45,10 +45,10 @@ tauri-plugin-http = "2"
 tauri-plugin-autostart = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = "2"
-window-vibrancy = "0.5.2"
-ocrs = "0.9.0"
+window-vibrancy = "0.6.0"
+ocrs = "0.10.3"
 image = "0.25.5"
-rten = { version = "0.13.1" }
+rten = { version = "0.18.0" }
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", rev = "9beeb789809eac7cc171c7405888fd309aebad64" }
 monitor = { git = "https://github.com/ahkohd/tauri-toolkit", rev = "f339123df704edd33dd235b9c41c8de9491778b1" }
 menubar = { git = "https://github.com/ahkohd/tauri-toolkit", rev = "f339123df704edd33dd235b9c41c8de9491778b1" }

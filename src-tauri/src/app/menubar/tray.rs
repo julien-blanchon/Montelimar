@@ -1,3 +1,4 @@
+// use log::info;
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
@@ -11,9 +12,9 @@ use tauri_nspanel::{
 };
 
 pub fn create(app_handle: &AppHandle) -> tauri::Result<TrayIcon> {
-    // println!("Creating tray icon...");
+    // info!("Creating tray icon...");
     let icon = Image::from_bytes(include_bytes!("../../../icons/tray.png"))?;
-    // println!("Tray icon loaded successfully.");
+    // info!("Tray icon loaded successfully.");
 
     // Example 1
     // let menu = Menu::new();
@@ -52,7 +53,7 @@ pub fn create(app_handle: &AppHandle) -> tauri::Result<TrayIcon> {
         // .title("MenuBar")
         .icon_as_template(true)
         .menu(&menu)
-        .menu_on_left_click(false)
+        .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id.as_ref() {
             "quit" => {
                 app.exit(0);
@@ -61,29 +62,29 @@ pub fn create(app_handle: &AppHandle) -> tauri::Result<TrayIcon> {
             _ => {}
         })
         .on_tray_icon_event(|tray, event| {
-            // println!("Tray icon event received: {:?}", event);
+            // info!("Tray icon event received: {:?}", event);
             let app_handle = tray.app_handle();
 
             match event {
                 TrayIconEvent::Click { button_state, rect, button, .. } => {
-                    // println!("Click event detected. Button state: {:?}", button_state);
+                    // info!("Click event detected. Button state: {:?}", button_state);
                     if button_state == MouseButtonState::Up && button == MouseButton::Left {
-                        // println!("Button state is UP. Processing...");
+                        // info!("Button state is UP. Processing...");
                         let panel = app_handle.get_webview_panel("menubar").unwrap();
-                        // println!("Retrieved webview panel: {:?}", panel);
+                        // info!("Retrieved webview panel: {:?}", panel);
 
                         if panel.is_visible() {
-                            // println!("Panel is visible. Hiding panel...");
+                            // info!("Panel is visible. Hiding panel...");
                             panel.order_out(None);
                             return;
                         }
 
-                        // println!("Panel is not visible. Showing panel...");
+                        // info!("Panel is not visible. Showing panel...");
                         let monitor_with_cursor = monitor::get_monitor_with_cursor().unwrap();
-                        // println!("Monitor with cursor: {:?}", monitor_with_cursor);
+                        // info!("Monitor with cursor: {:?}", monitor_with_cursor);
 
                         let scale_factor = monitor_with_cursor.scale_factor();
-                        // println!("Scale factor: {}", scale_factor);
+                        // info!("Scale factor: {}", scale_factor);
 
                         position_panel_at_menubar_icon(
                             app_handle,
@@ -91,23 +92,23 @@ pub fn create(app_handle: &AppHandle) -> tauri::Result<TrayIcon> {
                             rect.size.to_logical(scale_factor),
                             5.0,
                         );
-                        // println!("Positioned panel at menubar icon.");
+                        // info!("Positioned panel at menubar icon.");
 
                         let window = app_handle.get_webview_window("menubar").unwrap();
-                        // println!("Retrieved webview window: {:?}", window);
+                        // info!("Retrieved webview window: {:?}", window);
 
                         let window_monitor = window.current_monitor().unwrap().unwrap();
-                        // println!("Window monitor: {:?}", window_monitor);
+                        // info!("Window monitor: {:?}", window_monitor);
 
                         let is_window_in_monitor_with_cursor: bool =
                             window_monitor.position().x as f64 == monitor_with_cursor.position().x;
-                        // println!(
+                        // info!(
                         //     "Is window in monitor with cursor: {}",
                         //     is_window_in_monitor_with_cursor
                         // );
 
                         if is_window_in_monitor_with_cursor {
-                            // println!("Showing panel...");
+                            // info!("Showing panel...");
                             panel.show();
                         }
                     }

@@ -34,6 +34,17 @@
 	let isProcessing: boolean = $state(false);
 	let currentPage: 'main' | 'settings' = $state('main');
 
+	async function runWithTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+		return await Promise.race([
+			promise,
+			new Promise<never>((_, reject) =>
+				setTimeout(() => reject(new Error('Operation timed out')), timeoutMs)
+			)
+		]);
+	}
+
+	const DEFAULT_TIMEOUT = 60_000;
+
 	async function takeScreenshot(config: Config): Promise<string | undefined> {
 		isProcessing = true;
 		const uuid = crypto.randomUUID();
@@ -63,9 +74,9 @@
 			);
 			let text: string;
 			if (config.type === 'nougat') {
-				text = await runNougat(config, filename);
+				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
 			} else if (config.type === 'ocr') {
-				text = await runOCR(config, filename);
+				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {
 				throw new Error('Invalid method');
 			}
@@ -114,7 +125,7 @@
 
 <InitSystemSettings />
 <StartDatabase />
-<InitTauriLog enabled={false} />
+<InitTauriLog enabled={true} />
 <!-- <SQLiteMigration /> -->
 <SetupClient />
 <DisableRightClickMenu />
@@ -135,7 +146,7 @@
 
 {#each configSpecificShortcutConfigPair as pair}
 	<GlobalShortcut
-		bind:globalShortcut={pair.shortcut}
+		globalShortcut={pair.shortcut}
 		callback={async () => {
 			await takeScreenshot(pair.config);
 		}}
