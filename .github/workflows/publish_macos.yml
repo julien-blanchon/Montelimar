@@ -144,7 +144,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: julien-blanchon/homebrew-tap
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           path: tap-repo
 
       - name: Download Release Asset
