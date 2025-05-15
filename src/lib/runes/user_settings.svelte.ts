@@ -1,34 +1,34 @@
-import { Store } from "tauri-plugin-svelte";
+import { RuneStore } from '@tauri-store/svelte';
 import type { Settings } from "@/types";
 
-export const userSettings = new Store<{ value: Settings }>('settings', {
+export const userSettings = new RuneStore<{ value: Settings }>('settings', {
     value: {
         configs: [
             {
-                name: 'nougat-large',
+                name: 'facebook/nougat-base',
                 id: 1,
                 shortcutKey: null,
                 type: 'nougat',
                 nougat_config: {
-                    hf_model_name: 'nougat-large',
+                    hf_model_name: 'facebook/nougat-base',
                     temperature: 0.7,
                     top_p: 0.9,
                     repetition_penalty: 1.1,
                 },
-                color: '#0000FF',
+                color: '#F28B82',
             },
             {
-                name: 'nougat-small',
+                name: 'facebook/nougat-small',
                 id: 2,
                 shortcutKey: null,
                 type: 'nougat',
                 nougat_config: {
-                    hf_model_name: 'nougat-small',
+                    hf_model_name: 'facebook/nougat-small',
                     temperature: 0.7,
                     top_p: 0.9,
                     repetition_penalty: 1.1,
                 },
-                color: '#FF0000',
+                color: '#AECBFA',
             },
             {
                 name: 'ocr',
@@ -40,7 +40,7 @@ export const userSettings = new Store<{ value: Settings }>('settings', {
                     recognition_model_url: 'https://ocrs-models.s3-accelerate.amazonaws.com/text-recognition.rten',
                     disableLineBreaks: true,
                 },
-                color: '#0000FF',
+                color: '#FFF475',
             }
         ],
         startAtLogin: false,

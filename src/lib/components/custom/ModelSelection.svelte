@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Config } from '@/types';
-	import { userSettings } from '@/stores/user_settings';
+	import { userSettings } from '@/runes/user_settings.svelte';
 	import { cn } from '@/utils';
 
 	interface Props {
@@ -60,7 +60,7 @@
 						'text-sm font-medium'
 					)}
 					style={`--color: ${config.color}; --color-background: ${config.color}20; --color-background-hover: ${config.color}60`}
-					onkeydown={(e) => handleKeyNavigation(e, index, $userSettings.value.configs.length)}
+					onkeydown={(e) => handleKeyNavigation(e, index, userSettings.state.value.configs.length)}
 					onclick={(e) => {
 						e.preventDefault();
 						actionFunction(config);

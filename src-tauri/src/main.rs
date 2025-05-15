@@ -6,7 +6,7 @@ mod commands;
 mod model;
 mod state;
 mod utils;
-
+use log::{info};
 #[allow(unused_imports)]
 use specta_typescript::Typescript;
 
@@ -47,6 +47,8 @@ fn main() {
         .expect("Failed to export typescript bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state::AppState::new())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
@@ -61,6 +63,7 @@ fn main() {
                 .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
                     file_name: Some("logs".to_string()),
                 }))
+                .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview))
                 .level(log::LevelFilter::Info)
                 .max_file_size(50_000)
                 .build(),
@@ -106,14 +109,17 @@ fn main() {
             });
 
             let app_handle_clone = app_handle.clone();
-            tauri::async_runtime::spawn(async {
+            tauri::async_runtime::spawn(async move {
                 if !commands::nougat::is_sidecar_nougat_running().await {
-                    println!("Sidecar not running. Launching...");
-                    commands::nougat::launch_sidecar_nougat(app_handle_clone).unwrap();
+                    info!("Sidecar not running. Launching...");
+                    if let Err(err) = commands::nougat::launch_sidecar_nougat(app_handle_clone).await {
+                        log::error!("Error launching sidecar: {}", err);
+                    }
                 } else {
-                    println!("Sidecar is already running.");
+                    info!("Sidecar is already running.");
                 }
             });
+            
 
             Ok(())
         })

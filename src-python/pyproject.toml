@@ -1,7 +1,7 @@
 [project]
 name = "ocr_mlx"
 version = "0.1.0"
-description = "Add your description here"
+description = "MLX package for support of the Nougat OCR model"
 readme = "README.md"
 authors = [
     { name = "Julien Blanchon", email = "julien@blanchon.cc" }
@@ -35,8 +35,6 @@ packaging = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-
 
 [dependency-groups]
 dev = [

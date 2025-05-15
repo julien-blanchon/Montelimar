@@ -1,7 +1,7 @@
 import { type UserDatabase } from '@/types';
-import { Store } from 'tauri-plugin-svelte';
+import { RuneStore } from '@tauri-store/svelte';
 
-export const userData = new Store<{ value: UserDatabase[] }>('database',
+export const userData = new RuneStore<{ value: UserDatabase[] }>('database',
     {
         value: []
     },

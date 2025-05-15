@@ -9,7 +9,7 @@ use tauri_nspanel::{
     panel_delegate, Panel, WebviewWindowExt as PanelWebviewWindowExt,
 };
 use thiserror::Error;
-
+use log::{error, info};
 type TauriError = tauri::Error;
 
 #[derive(Error, Debug)]
@@ -29,7 +29,7 @@ pub trait WebviewWindowExt {
 
 impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
     fn to_spotlight_panel(&self) -> tauri::Result<Panel> {
-        println!("Converting window to spotlight panel");
+        info!("Converting window to spotlight panel");
 
         // Convert window to panel
         let panel = self.to_panel().map_err(|_| TauriError::Anyhow(Error::Panel.into()))?;
@@ -37,14 +37,14 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
         // Set panel level
         panel.set_level(NSMainMenuWindowLevel + 1);
 
-        println!("Panel level set to ");
+        info!("Panel level set to ");
 
         // Allows the panel to display on the same space as the full screen window
         panel.set_collection_behaviour(
             NSWindowCollectionBehavior::NSWindowCollectionBehaviorFullScreenAuxiliary,
         );
 
-        println!("Panel collection behaviour set to ");
+        info!("Panel collection behaviour set to ");
 
         #[allow(non_upper_case_globals)]
         const NSWindowStyleMaskNonActivatingPanel: i32 = 1 << 7;
@@ -52,7 +52,7 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
         // Ensures the panel cannot activate the App
         panel.set_style_mask(NSWindowStyleMaskNonActivatingPanel);
 
-        println!("Panel style mask set to ");
+        info!("Panel style mask set to ");
 
         // Set up a delegate to handle key window events for the panel
         //
@@ -68,13 +68,13 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
             window_did_become_key
         });
 
-        println!("Panel delegate set");
+        info!("Panel delegate set");
 
         let app_handle = self.app_handle().clone();
 
         let label = self.label().to_string();
 
-        println!("Panel label set to ");
+        info!("Panel label set to ");
 
         panel_delegate.set_listener(Box::new(move |delegate_name: String| {
             match delegate_name.as_str() {
@@ -90,7 +90,7 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
 
         panel.set_delegate(panel_delegate);
 
-        println!("Panel delegate set");
+        info!("Panel delegate set");
 
         Ok(panel)
     }
@@ -109,7 +109,7 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
 
         let window_frame: NSRect = unsafe { window_handle.frame() };
 
-        println!("Window frame: ");
+        info!("Window frame: ");
 
         let rect = NSRect {
             origin: NSPoint {
@@ -121,7 +121,7 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
             size: window_frame.size,
         };
 
-        println!("Setting window frame to ");
+        info!("Setting window frame to ");
 
         let _: () = unsafe { msg_send![window_handle, setFrame: rect display: YES] };
 

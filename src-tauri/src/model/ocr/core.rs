@@ -41,7 +41,7 @@ fn download_file(url: &str, filename: Option<&str>) -> Result<PathBuf, anyhow::E
         return Ok(file_path);
     }
 
-    eprintln!("Downloading {}...", url);
+    info!("Downloading {}...", url);
 
     let mut reader = ureq::get(url).call()?.into_reader();
     let mut body = Vec::new();
@@ -122,7 +122,7 @@ pub fn run_ocr(
         valid_lines += 1;
         info!("Line {}: \"{}\"", valid_lines, line);
     }
-    println!("{}", format_text_output(&line_texts));
+    info!("{}", format_text_output(&line_texts));
 
     Ok(format_text_output(&line_texts))
 }

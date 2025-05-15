@@ -2,6 +2,8 @@ from typing import Any
 
 import mlx.core as mx
 
+from ocr_mlx.model.nougat import Nougat
+
 
 def apply_repetition_penalty(logits: mx.array, generated_tokens: Any, penalty: float):
     if len(generated_tokens) > 0:
@@ -32,7 +34,7 @@ def top_p_sampling(logits: mx.array, top_p: float, temperature: float) -> mx.arr
     return sorted_indices.squeeze(0)[sorted_token]
 
 
-def sample(logits, temperature=0.0, top_p=0.0):
+def sample(logits: mx.array, temperature: float = 0.0, top_p: float = 0.0) -> mx.array:
     if temperature == 0:
         return mx.argmax(logits, axis=-1)
     return (
@@ -43,14 +45,14 @@ def sample(logits, temperature=0.0, top_p=0.0):
 
 
 def generate(
-    model,
-    pixel_values,
-    max_new_tokens=4096,
-    eos_token_id=2,
-    temperature=0.0,
-    top_p=0.0,
-    repetition_penalty=None,
-    repetition_context_size=10,
+    model: Nougat,
+    pixel_values: mx.array,
+    max_new_tokens: int = 4096,
+    eos_token_id: int = 2,
+    temperature: float = 0.0,
+    top_p: float = 0.0,
+    repetition_penalty: float | None = None,
+    repetition_context_size: int = 10,
 ):
     encoder_hidden_states = model.encoder(pixel_values)
     new_token = mx.array([0])

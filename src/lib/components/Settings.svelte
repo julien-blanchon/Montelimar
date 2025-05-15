@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { attachLogger } from '@tauri-apps/plugin-log';
 	import type { ConfigNougat, ConfigOCR } from '@/types';
-	import { userSettings } from '@/stores/user_settings';
+	import { getVersion } from '@tauri-apps/api/app';
+	import { userSettings } from '@/runes/user_settings.svelte';
 	import {
 		Pencil,
 		Trash2,
@@ -32,15 +34,18 @@
 	import { systemSettings } from '@/runes/system_settings.svelte';
 	import Confetti from './custom/Confetti.svelte';
 	import ToggleConfetti from './custom/ToggleConfetti.svelte';
+	import { listen } from '@tauri-apps/api/event';
+	import { onMount } from 'svelte';
 
 	let editingConfig: string | null = $state(null);
 	let isAddingNew = $state(false);
 	let isNougatConfig = $state(true);
 	let saveConfirmationId: number | null = $state(null);
 	let saveConfirmationIndex: number | null = $state(null);
+	let logs: string[] = $state([]);
 
 	function getNextId() {
-		return Math.max(0, ...$userSettings.value.configs.map((c) => c.id)) + 1;
+		return Math.max(0, ...userSettings.state.value.configs.map((c) => c.id)) + 1;
 	}
 
 	function pickRandomColor() {
@@ -91,12 +96,7 @@
 			items: newItems,
 			info: { source, trigger }
 		} = e.detail;
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: newItems
-			}
-		});
+		userSettings.state.value.configs = newItems;
 	}
 
 	function handleFinalize(e: CustomEvent) {
@@ -104,12 +104,7 @@
 			items: newItems,
 			info: { source }
 		} = e.detail;
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: newItems
-			}
-		});
+		userSettings.state.value.configs = newItems;
 	}
 
 	function startDrag(e: Event) {
@@ -159,12 +154,10 @@
 			const config = isNougatConfig ? newNougatConfig : newOCRConfig;
 			if (config.name) {
 				const nextId = getNextId();
-				userSettings.set({
-					value: {
-						...$userSettings.value,
-						configs: [{ ...config, id: nextId }, ...$userSettings.value.configs]
-					}
-				});
+				userSettings.state.value.configs = [
+					{ ...config, id: nextId },
+					...userSettings.state.value.configs
+				];
 				saveConfirmationId = nextId;
 				setTimeout(() => {
 					saveConfirmationId = null;
@@ -180,15 +173,24 @@
 	}
 
 	function deleteConfig(index: number) {
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: $userSettings.value.configs.filter((_, i) => i !== index)
-			}
-		});
+		userSettings.state.value.configs = userSettings.state.value.configs.filter(
+			(_, i) => i !== index
+		);
 	}
 
 	let rating = $state(3);
+
+	$effect(() => {
+		let unlistenPromise = attachLogger(({ level, message }) => {
+			logs = [...logs, `[${level}] ${message}`];
+			if (logs.length > 500) logs = logs.slice(-500);
+		});
+
+		// Clean up listener on unmount
+		return () => {
+			unlistenPromise.then((unlisten) => unlisten());
+		};
+	});
 </script>
 
 <div class="h-[640px] w-full space-y-6 overflow-scroll px-4 py-2">
@@ -307,7 +309,7 @@
 							<div class="form-control">
 								<label class="label" for="model-name">
 									<span class="label-text">Model Name</span>
-									<span class="label-text-alt">Huggingface mod</span>
+									<span class="label-text-alt">Huggingface model path</span>
 								</label>
 								<input
 									id="model-name"
@@ -499,7 +501,7 @@
 
 			<section
 				use:dndzone={{
-					items: $userSettings.value.configs,
+					items: userSettings.state.value.configs,
 					flipDurationMs: 200,
 					dropTargetStyle: {
 						outline: 'none',
@@ -510,7 +512,7 @@
 				onfinalize={handleFinalize}
 				class="space-y-4 rounded-lg p-2"
 			>
-				{#each $userSettings.value.configs as config, index (config.id)}
+				{#each userSettings.state.value.configs as config, index (config.id)}
 					<div class="rounded-lg border-[1px] border-base-300">
 						{#if editingConfig === index.toString()}
 							<div
@@ -537,7 +539,6 @@
 												id="config-name"
 												type="text"
 												placeholder="Name"
-												maxlength="20"
 												minlength="1"
 												class={cn(
 													'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
@@ -583,7 +584,6 @@
 													id="model-name"
 													type="text"
 													placeholder="Model Name"
-													maxlength="20"
 													class={cn(
 														'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
 														'focus:border-primary/20 focus:bg-base-100',
@@ -822,8 +822,10 @@
 				<!-- Start at Login -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Power class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<Power class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Start at Login</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -835,7 +837,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.startAtLogin}
+								bind:checked={userSettings.state.value.startAtLogin}
 							/>
 						</div>
 					</label>
@@ -844,8 +846,10 @@
 				<!-- Play Sound -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Volume2 class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<Volume2 class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Play Sound</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -857,7 +861,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.playSound}
+								bind:checked={userSettings.state.value.playSound}
 							/>
 						</div>
 					</label>
@@ -866,8 +870,10 @@
 				<!-- Auto Copy to Clipboard -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Clipboard class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<Clipboard class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Auto Copy to Clipboard</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -879,17 +885,19 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.autoCopyToClipboard}
+								bind:checked={userSettings.state.value.autoCopyToClipboard}
 							/>
 						</div>
 					</label>
 				</div>
 
 				<!-- Show Menu Bar Icon -->
-				<div class="form-control">
+				<!-- <div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<MenuSquare class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<MenuSquare class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Show Menu Bar Icon</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -901,17 +909,19 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.showMenuBarIcon}
+								bind:checked={userSettings.state.value.showMenuBarIcon}
 							/>
 						</div>
 					</label>
-				</div>
+				</div> -->
 
 				<!-- Disable History -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<History class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<History class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Disable History</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -923,7 +933,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.disableHistory}
+								bind:checked={userSettings.state.value.disableHistory}
 							/>
 						</div>
 					</label>
@@ -932,8 +942,10 @@
 				<!-- Global Shortcut -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Keyboard class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<Keyboard class="h-4 w-4 text-base-content/70" />
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Global Capture Shortcut</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -942,7 +954,7 @@
 							</div>
 						</div>
 						<div class="w-[15rem]">
-							<InputShortcut bind:value={$userSettings.value.globalShortcut} />
+							<InputShortcut bind:value={userSettings.state.value.globalShortcut} />
 						</div>
 					</label>
 				</div>
@@ -950,8 +962,12 @@
 				<!-- Show notification on capture -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Bell class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<div class="flex h-5 w-5 items-center justify-center">
+									<Bell class="h-4 w-4 text-base-content/70" />
+								</div>
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Show Notification on Capture</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -963,7 +979,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.showNotificationOnCapture}
+								bind:checked={userSettings.state.value.showNotificationOnCapture}
 							/>
 						</div>
 					</label>
@@ -972,8 +988,12 @@
 				<!-- Notification Permission -->
 				<div class="form-control">
 					<label class="flex items-center justify-between gap-4">
-						<div class="flex gap-3">
-							<Bell class="mt-1 size-5 text-base-content/70" />
+						<div class="flex flex-row gap-3">
+							<div class="flex h-5 w-5 items-center justify-center">
+								<div class="flex h-5 w-5 items-center justify-center">
+									<Bell class="h-4 w-4 text-base-content/70" />
+								</div>
+							</div>
 							<div class="flex min-w-0 flex-col gap-1">
 								<span class="text-base font-medium leading-none">Notification Permission</span>
 								<span class="line-clamp-2 text-sm text-base-content/60"
@@ -1014,16 +1034,18 @@
 			<h2 class="text-xl font-semibold">About</h2>
 			<div class="space-y-6">
 				<div class="flex flex-col gap-1">
-					<h3 class="text-base font-medium">MenuBar Screenshot</h3>
-					<p class="text-sm text-base-content/60">
-						A powerful screenshot tool with OCR and text extraction capabilities
-					</p>
+					<h3 class="text-base font-medium">Montelimar - OCR</h3>
+					<p class="text-sm text-base-content/60">A OCR toolbox integrated in your Mac</p>
 				</div>
 
 				<div class="flex flex-col gap-2">
 					<div class="flex items-center gap-2 text-sm">
 						<span class="font-medium">Version</span>
-						<span class="text-base-content/60">1.0.0</span>
+						{#await getVersion()}
+							<span class="text-base-content/60">Loading version...</span>
+						{:then version}
+							<span class="text-base-content/60">{version}</span>
+						{/await}
 					</div>
 					<div class="flex items-center gap-2 text-sm">
 						<span class="font-medium">Created by</span>
@@ -1153,6 +1175,20 @@
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+
+	<!-- Log Viewer Section -->
+	<div class="mt-6 rounded-lg border border-base-300 bg-base-100/50 p-6">
+		<h2 class="mb-2 text-xl font-semibold">Application Logs</h2>
+		<div class="h-64 overflow-auto rounded bg-base-200 p-2 font-mono text-xs">
+			{#if logs.length === 0}
+				<div class="text-base-content/60">No logs yet.</div>
+			{:else}
+				{#each logs as log}
+					<div>{log}</div>
+				{/each}
+			{/if}
 		</div>
 	</div>
 </div>
