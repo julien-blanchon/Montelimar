@@ -3,8 +3,8 @@
 	import { slide } from 'svelte/transition';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 	import { commands } from '@/tauri/bindings';
-	import { userData } from '@/stores/user_database';
-	import { userSettings } from '@/stores/user_settings';
+	import { userData } from '@/runes/user_database.svelte';
+	import { userSettings } from '@/runes/user_settings.svelte';
 	import type { Config } from '@/types';
 	import Settings from '@/components/Settings.svelte';
 	import { sendNotification } from '@tauri-apps/plugin-notification';
@@ -40,32 +40,27 @@
 		const filename = `${systemSettings.appDataDirPath}/${uuid}.png`;
 		const start_time = performance.now();
 		console.log('takeScreenshot', config);
-		if (!$userSettings.value.disableHistory) {
-			userData.set({
-				value: [
-					{
-						id: uuid,
-						image: null,
-						content: null,
-						date: new Date(),
-						duration: null,
-						config: config
-					},
-					...$userData.value
-				]
-			});
+		if (!userSettings.state.value.disableHistory) {
+			userData.state.value = [
+				{
+					id: uuid,
+					image: null,
+					content: null,
+					date: new Date(),
+					duration: null,
+					config: config
+				},
+				...userData.state.value
+			];
 		}
 
 		try {
 			await commands.closeMenubarPanel();
 
-			const base64 = await requestScreenShot(filename, $userSettings.value.playSound);
-			userData.set({
-				value: $userData.value.map((item) =>
-					item.id === uuid ? { ...item, image: convertFileSrc(filename) } : item
-				)
-			});
-
+			const base64 = await requestScreenShot(filename, userSettings.state.value.playSound);
+			userData.state.value = userData.state.value.map((item) =>
+				item.id === uuid ? { ...item, image: convertFileSrc(filename) } : item
+			);
 			let text: string;
 			if (config.type === 'nougat') {
 				text = await runNougat(config, filename);
@@ -76,22 +71,20 @@
 			}
 
 			animatedTray();
-			if ($userSettings.value.showNotificationOnCapture) {
+			if (userSettings.state.value.showNotificationOnCapture) {
 				sendNotification({ title: 'Montelimar', body: text });
 			}
-			if ($userSettings.value.autoCopyToClipboard) {
+			if (userSettings.state.value.autoCopyToClipboard) {
 				writeText(text);
 			}
 
 			const end_time = performance.now();
 			const duration = end_time - start_time;
 
-			if (!$userSettings.value.disableHistory) {
-				userData.set({
-					value: $userData.value.map((item) =>
-						item.id === uuid ? { ...item, duration: duration, content: text } : item
-					)
-				});
+			if (!userSettings.state.value.disableHistory) {
+				userData.state.value = userData.state.value.map((item) =>
+					item.id === uuid ? { ...item, duration: duration, content: text } : item
+				);
 			}
 
 			return text;
@@ -101,7 +94,7 @@
 				body: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
 			});
 			// Remove the screenshot from the user data
-			userData.set({ value: $userData.value.filter((item) => item.id !== uuid) });
+			userData.state.value = userData.state.value.filter((item) => item.id !== uuid);
 			console.error(error);
 		} finally {
 			isProcessing = false;
@@ -110,7 +103,7 @@
 	}
 
 	let configSpecificShortcutConfigPair = $derived.by(() => {
-		return $userSettings.value.configs.map((config) => {
+		return userSettings.state.value.configs.map((config) => {
 			return {
 				config: config,
 				shortcut: config.shortcutKey
@@ -127,13 +120,13 @@
 <DisableRightClickMenu />
 
 <StartCleanUpShortcut />
-<Autostart bind:autostart={$userSettings.value.startAtLogin} />
-<PlaySound bind:playSound={$userSettings.value.playSound} />
-<AutoCopyClipboard bind:autoCopyClipboard={$userSettings.value.autoCopyToClipboard} />
-<ShowMenuBarIcon bind:showMenuBarIcon={$userSettings.value.showMenuBarIcon} />
-<DisableHistory bind:disableHistory={$userSettings.value.disableHistory} />
+<Autostart bind:autostart={userSettings.state.value.startAtLogin} />
+<PlaySound bind:playSound={userSettings.state.value.playSound} />
+<AutoCopyClipboard bind:autoCopyClipboard={userSettings.state.value.autoCopyToClipboard} />
+<ShowMenuBarIcon bind:showMenuBarIcon={userSettings.state.value.showMenuBarIcon} />
+<DisableHistory bind:disableHistory={userSettings.state.value.disableHistory} />
 <GlobalShortcut
-	bind:globalShortcut={$userSettings.value.globalShortcut}
+	bind:globalShortcut={userSettings.state.value.globalShortcut}
 	callback={async () => {
 		const config = await askUserForConfig();
 		await takeScreenshot(config);

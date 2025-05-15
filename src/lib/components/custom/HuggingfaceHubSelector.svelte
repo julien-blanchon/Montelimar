@@ -5,7 +5,7 @@
 	interface Props {
 		huggingface_model_path: string;
 	}
-	const { huggingface_model_path = $bindable() } = $props();
+	const { huggingface_model_path = $bindable() }: Props = $props();
 
 	const models: string[] = $state([]);
 </script>

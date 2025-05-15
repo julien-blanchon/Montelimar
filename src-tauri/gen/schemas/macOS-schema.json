@@ -6687,10 +6687,10 @@
           "markdownDescription": "Denies the values command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the Pinia plugin\n#### This default permission set includes:\n\n- `allow-clear-autosave`\n- `allow-get-default-save-strategy`\n- `allow-get-save-strategy`\n- `allow-get-store-ids`\n- `allow-get-store-path`\n- `allow-get-store-state`\n- `allow-get-svelte-path`\n- `allow-load`\n- `allow-patch`\n- `allow-save`\n- `allow-save-all`\n- `allow-save-all-now`\n- `allow-save-now`\n- `allow-save-some`\n- `allow-save-some-now`\n- `allow-set-autosave`\n- `allow-set-save-strategy`\n- `allow-set-store-options`\n- `allow-unload`",
+          "description": "Default permissions for tauri-plugin-svelte.\n#### This default permission set includes:\n\n- `allow-clear-autosave`\n- `allow-get-default-save-strategy`\n- `allow-get-save-strategy`\n- `allow-get-store-collection-path`\n- `allow-get-store-ids`\n- `allow-get-store-path`\n- `allow-get-store-state`\n- `allow-load`\n- `allow-patch`\n- `allow-save`\n- `allow-save-all`\n- `allow-save-all-now`\n- `allow-save-now`\n- `allow-save-some`\n- `allow-save-some-now`\n- `allow-set-autosave`\n- `allow-set-save-strategy`\n- `allow-set-store-collection-path`\n- `allow-set-store-options`\n- `allow-unload`",
           "type": "string",
           "const": "svelte:default",
-          "markdownDescription": "Default permissions for the Pinia plugin\n#### This default permission set includes:\n\n- `allow-clear-autosave`\n- `allow-get-default-save-strategy`\n- `allow-get-save-strategy`\n- `allow-get-store-ids`\n- `allow-get-store-path`\n- `allow-get-store-state`\n- `allow-get-svelte-path`\n- `allow-load`\n- `allow-patch`\n- `allow-save`\n- `allow-save-all`\n- `allow-save-all-now`\n- `allow-save-now`\n- `allow-save-some`\n- `allow-save-some-now`\n- `allow-set-autosave`\n- `allow-set-save-strategy`\n- `allow-set-store-options`\n- `allow-unload`"
+          "markdownDescription": "Default permissions for tauri-plugin-svelte.\n#### This default permission set includes:\n\n- `allow-clear-autosave`\n- `allow-get-default-save-strategy`\n- `allow-get-save-strategy`\n- `allow-get-store-collection-path`\n- `allow-get-store-ids`\n- `allow-get-store-path`\n- `allow-get-store-state`\n- `allow-load`\n- `allow-patch`\n- `allow-save`\n- `allow-save-all`\n- `allow-save-all-now`\n- `allow-save-now`\n- `allow-save-some`\n- `allow-save-some-now`\n- `allow-set-autosave`\n- `allow-set-save-strategy`\n- `allow-set-store-collection-path`\n- `allow-set-store-options`\n- `allow-unload`"
         },
         {
           "description": "Enables the clear_autosave command without any pre-configured scope.",
@@ -6711,6 +6711,12 @@
           "markdownDescription": "Enables the get_save_strategy command without any pre-configured scope."
         },
         {
+          "description": "Enables the get_store_collection_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "svelte:allow-get-store-collection-path",
+          "markdownDescription": "Enables the get_store_collection_path command without any pre-configured scope."
+        },
+        {
           "description": "Enables the get_store_ids command without any pre-configured scope.",
           "type": "string",
           "const": "svelte:allow-get-store-ids",
@@ -6727,12 +6733,6 @@
           "type": "string",
           "const": "svelte:allow-get-store-state",
           "markdownDescription": "Enables the get_store_state command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get_svelte_path command without any pre-configured scope.",
-          "type": "string",
-          "const": "svelte:allow-get-svelte-path",
-          "markdownDescription": "Enables the get_svelte_path command without any pre-configured scope."
         },
         {
           "description": "Enables the load command without any pre-configured scope.",
@@ -6795,6 +6795,12 @@
           "markdownDescription": "Enables the set_save_strategy command without any pre-configured scope."
         },
         {
+          "description": "Enables the set_store_collection_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "svelte:allow-set-store-collection-path",
+          "markdownDescription": "Enables the set_store_collection_path command without any pre-configured scope."
+        },
+        {
           "description": "Enables the set_store_options command without any pre-configured scope.",
           "type": "string",
           "const": "svelte:allow-set-store-options",
@@ -6825,6 +6831,12 @@
           "markdownDescription": "Denies the get_save_strategy command without any pre-configured scope."
         },
         {
+          "description": "Denies the get_store_collection_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "svelte:deny-get-store-collection-path",
+          "markdownDescription": "Denies the get_store_collection_path command without any pre-configured scope."
+        },
+        {
           "description": "Denies the get_store_ids command without any pre-configured scope.",
           "type": "string",
           "const": "svelte:deny-get-store-ids",
@@ -6841,12 +6853,6 @@
           "type": "string",
           "const": "svelte:deny-get-store-state",
           "markdownDescription": "Denies the get_store_state command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get_svelte_path command without any pre-configured scope.",
-          "type": "string",
-          "const": "svelte:deny-get-svelte-path",
-          "markdownDescription": "Denies the get_svelte_path command without any pre-configured scope."
         },
         {
           "description": "Denies the load command without any pre-configured scope.",
@@ -6907,6 +6913,12 @@
           "type": "string",
           "const": "svelte:deny-set-save-strategy",
           "markdownDescription": "Denies the set_save_strategy command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the set_store_collection_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "svelte:deny-set-store-collection-path",
+          "markdownDescription": "Denies the set_store_collection_path command without any pre-configured scope."
         },
         {
           "description": "Denies the set_store_options command without any pre-configured scope.",

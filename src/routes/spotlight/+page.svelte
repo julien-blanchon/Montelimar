@@ -5,7 +5,7 @@
 	import ModelSelection from '@/components/custom/ModelSelection.svelte';
 	import InitSystemSettings from '@/components/plugin/InitSystemSettings.svelte';
 	import DisableRightClickMenu from '@/components/plugin/DisableRightClickMenu.svelte';
-	import { userSettings } from '@/stores/user_settings';
+	import { userSettings } from '@/runes/user_settings.svelte';
 	import StartDatabase from '@/components/plugin/StartDatabase.svelte';
 </script>
 
@@ -27,7 +27,7 @@
 			actionFunction={(config) => {
 				emit('config-selected', config);
 			}}
-			configs={$userSettings.value.configs}
+			configs={userSettings.state.value.configs}
 		/>
 	</div>
 </div>

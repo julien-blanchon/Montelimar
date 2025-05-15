@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ConfigNougat, ConfigOCR } from '@/types';
-	import { userSettings } from '@/stores/user_settings';
+	import { userSettings } from '@/runes/user_settings.svelte';
 	import {
 		Pencil,
 		Trash2,
@@ -40,7 +40,7 @@
 	let saveConfirmationIndex: number | null = $state(null);
 
 	function getNextId() {
-		return Math.max(0, ...$userSettings.value.configs.map((c) => c.id)) + 1;
+		return Math.max(0, ...userSettings.state.value.configs.map((c) => c.id)) + 1;
 	}
 
 	function pickRandomColor() {
@@ -91,12 +91,7 @@
 			items: newItems,
 			info: { source, trigger }
 		} = e.detail;
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: newItems
-			}
-		});
+		userSettings.state.value.configs = newItems;
 	}
 
 	function handleFinalize(e: CustomEvent) {
@@ -104,12 +99,7 @@
 			items: newItems,
 			info: { source }
 		} = e.detail;
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: newItems
-			}
-		});
+		userSettings.state.value.configs = newItems;
 	}
 
 	function startDrag(e: Event) {
@@ -159,12 +149,10 @@
 			const config = isNougatConfig ? newNougatConfig : newOCRConfig;
 			if (config.name) {
 				const nextId = getNextId();
-				userSettings.set({
-					value: {
-						...$userSettings.value,
-						configs: [{ ...config, id: nextId }, ...$userSettings.value.configs]
-					}
-				});
+				userSettings.state.value.configs = [
+					{ ...config, id: nextId },
+					...userSettings.state.value.configs
+				];
 				saveConfirmationId = nextId;
 				setTimeout(() => {
 					saveConfirmationId = null;
@@ -180,12 +168,9 @@
 	}
 
 	function deleteConfig(index: number) {
-		userSettings.set({
-			value: {
-				...$userSettings.value,
-				configs: $userSettings.value.configs.filter((_, i) => i !== index)
-			}
-		});
+		userSettings.state.value.configs = userSettings.state.value.configs.filter(
+			(_, i) => i !== index
+		);
 	}
 
 	let rating = $state(3);
@@ -499,7 +484,7 @@
 
 			<section
 				use:dndzone={{
-					items: $userSettings.value.configs,
+					items: userSettings.state.value.configs,
 					flipDurationMs: 200,
 					dropTargetStyle: {
 						outline: 'none',
@@ -510,7 +495,7 @@
 				onfinalize={handleFinalize}
 				class="space-y-4 rounded-lg p-2"
 			>
-				{#each $userSettings.value.configs as config, index (config.id)}
+				{#each userSettings.state.value.configs as config, index (config.id)}
 					<div class="rounded-lg border-[1px] border-base-300">
 						{#if editingConfig === index.toString()}
 							<div
@@ -835,7 +820,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.startAtLogin}
+								bind:checked={userSettings.state.value.startAtLogin}
 							/>
 						</div>
 					</label>
@@ -857,7 +842,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.playSound}
+								bind:checked={userSettings.state.value.playSound}
 							/>
 						</div>
 					</label>
@@ -879,7 +864,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.autoCopyToClipboard}
+								bind:checked={userSettings.state.value.autoCopyToClipboard}
 							/>
 						</div>
 					</label>
@@ -901,7 +886,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.showMenuBarIcon}
+								bind:checked={userSettings.state.value.showMenuBarIcon}
 							/>
 						</div>
 					</label>
@@ -923,7 +908,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.disableHistory}
+								bind:checked={userSettings.state.value.disableHistory}
 							/>
 						</div>
 					</label>
@@ -942,7 +927,7 @@
 							</div>
 						</div>
 						<div class="w-[15rem]">
-							<InputShortcut bind:value={$userSettings.value.globalShortcut} />
+							<InputShortcut bind:value={userSettings.state.value.globalShortcut} />
 						</div>
 					</label>
 				</div>
@@ -963,7 +948,7 @@
 							<input
 								type="checkbox"
 								class="toggle toggle-primary"
-								bind:checked={$userSettings.value.showNotificationOnCapture}
+								bind:checked={userSettings.state.value.showNotificationOnCapture}
 							/>
 						</div>
 					</label>

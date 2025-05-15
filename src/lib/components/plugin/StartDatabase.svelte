@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { userData } from '@/stores/user_database';
-	import { userSettings } from '@/stores/user_settings';
+	import { userData } from '@/runes/user_database.svelte';
+	import { userSettings } from '@/runes/user_settings.svelte';
 
 	$effect(() => {
 		async function startDatabase() {

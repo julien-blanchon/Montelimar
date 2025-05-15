@@ -6,11 +6,11 @@
 	import { crossfade } from 'svelte/transition';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 	import { cn } from '@/utils';
-	import { userData } from '@/stores/user_database';
+	import { userData } from '@/runes/user_database.svelte';
 	import { animatedTray } from '@/actions';
 	import { healthHealthGet } from '@/python/client/sdk.gen';
 	import HuggingfaceHubSelector from './custom/HuggingfaceHubSelector.svelte';
-	import { userSettings } from '@/stores/user_settings';
+	import { userSettings } from '@/runes/user_settings.svelte';
 
 	interface Props {
 		search: string;
@@ -24,9 +24,9 @@
 
 	let filteredItems = $derived.by(() => {
 		if (search == '') {
-			return $userData.value;
+			return userData.state.value;
 		}
-		return $userData.value.filter((item) =>
+		return userData.state.value.filter((item) =>
 			item.content?.toLowerCase().includes(search.toLowerCase())
 		);
 	});
@@ -141,7 +141,7 @@
 				<div class="grid h-full w-full grid-cols-2 gap-2 overflow-hidden">
 					{#key currentPage}
 						{#each paginatedItems as item, i (item.id)}
-							{@const currentConfig = $userSettings.value.configs.find(
+							{@const currentConfig = userSettings.state.value.configs.find(
 								(config) => config.id === item.config.id
 							)}
 							{@const currentConfigColor = currentConfig?.color || item.config.color}
@@ -228,9 +228,9 @@
 											<button
 												onclick={() => {
 													// Remove the item from the database
-													userData.set({
-														value: $userData.value.filter((i) => i.id !== item.id)
-													});
+													userData.state.value = userData.state.value.filter(
+														(i) => i.id !== item.id
+													);
 												}}
 												class="group/delete flex h-1/2 w-full items-center justify-center gap-2 rounded-b-md bg-red-500/10 p-2 transition-colors hover:bg-red-500/20 active:bg-red-500/40"
 											>
@@ -242,9 +242,9 @@
 											<button
 												onclick={() => {
 													// Remove the item from the database
-													userData.set({
-														value: $userData.value.filter((i) => i.id !== item.id)
-													});
+													userData.state.value = userData.state.value.filter(
+														(i) => i.id !== item.id
+													);
 												}}
 												class="group/delete flex h-full w-full items-center justify-center gap-2 rounded-b-md bg-red-500/10 p-2 transition-colors hover:bg-red-500/20 active:bg-red-500/40"
 											>
@@ -257,7 +257,7 @@
 						{/each}
 					{/key}
 				</div>
-			{:else if $userData.value.length === 0}
+			{:else if userData.state.value.length === 0}
 				<!-- No items found -->
 				<div class="mt-4 flex h-32 w-full items-center justify-center rounded-lg">
 					<p class="text-base-content/70">Your future snips will appear here.</p>
