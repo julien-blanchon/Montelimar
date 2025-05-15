@@ -113,6 +113,7 @@ jobs:
         run: bun install
 
       - uses: tauri-apps/tauri-action@v0
+        id: build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
@@ -132,7 +133,9 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-  
+    outputs:
+      app_version: ${{ steps.build.outputs.appVersion }}
+
   publish-to-cask:
     needs: build-tauri
     runs-on: ubuntu-latest
@@ -147,7 +150,7 @@ jobs:
       - name: Download Release Asset
         run: |
           mkdir dist
-          gh release download "app-v__VERSION__" \
+          gh release download "app-v${{ needs.build-tauri.outputs.app_version }}" \
             --repo julien-blanchon/Montelimar \
             --pattern "*aarch64.app.tar.gz" \
             --dir dist
@@ -164,7 +167,7 @@ jobs:
 
       - name: Update Cask
         run: |
-          VERSION=$(basename "${{ steps.shasum.outputs.file_name }}" | sed -E 's/.*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          VERSION="${{ needs.build-tauri.outputs.app_version }}"
           DOWNLOAD_URL="https://github.com/julien-blanchon/Montelimar/releases/download/app-v${VERSION}/${{ steps.shasum.outputs.file_name }}"
           CASK_PATH="tap-repo/Casks/montelimar.rb"
 
