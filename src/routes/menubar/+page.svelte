@@ -22,10 +22,8 @@
 	import InitSystemSettings from '@/components/plugin/InitSystemSettings.svelte';
 	import { animatedTray, askUserForConfig, runNougat, runOCR, requestScreenShot } from '@/actions';
 	import DisableRightClickMenu from '@/components/plugin/DisableRightClickMenu.svelte';
-	// import ExecuteOnEscape from '@/components/plugin/ExecuteOnEscape.svelte';
 	import { systemSettings } from '@/runes/system_settings.svelte';
 	import InitTauriLog from '@/components/plugin/InitTauriLog.svelte';
-	import SQLiteMigration from '@/components/plugin/SQLiteMigration.svelte';
 	import { TrayIcon } from '@tauri-apps/api/tray';
 	import { changeTrayWithEasing } from '@/tray';
 	import SetupClient from '@/components/plugin/SetupClient.svelte';

@@ -1,6 +1,6 @@
 [package]
 name = "montelimar"
-version = "0.1.0"
+version = "2025.05.17"
 description = "Montelimar - OCR Simplified"
 authors = ["Julien Blanchon <julien@blanchon.cc>"]
 edition = "2021"
