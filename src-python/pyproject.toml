@@ -9,15 +9,15 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "apscheduler>=3.11.0",
-    "fastapi[standard]>=0.115.6",
-    "hatch>=1.14.0",
-    "huggingface-hub[hf-transfer]>=0.27.0",
-    "mlx>=0.21.1",
-    "pillow>=11.0.0",
-    "pydantic>=2.10.4",
+    "fastapi[standard]>=0.115.12",
+    "hatch>=1.14.1",
+    "huggingface-hub[hf-transfer]>=0.31.2",
+    "mlx>=0.25.2",
+    "pillow>=11.2.1",
+    "pydantic>=2.11.4",
     "requests>=2.32.3",
-    "transformers>=4.47.1",
-    "typer>=0.15.1",
+    "transformers>=4.51.3",
+    "typer>=0.15.4",
 ]
 
 

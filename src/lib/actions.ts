@@ -7,8 +7,13 @@ import { TrayIcon } from "@tauri-apps/api/tray";
 import { changeTrayWithEasing } from "./tray";
 import { linear } from "svelte/easing";
 
-function arrayBufferToBase64(img: Uint8Array) {
-    return btoa(new Uint8Array(img).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+function arrayBufferToBase64(buffer: Uint8Array): string {
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < buffer.length; i += chunkSize) {
+        binary += String.fromCharCode(...buffer.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
 }
 
 

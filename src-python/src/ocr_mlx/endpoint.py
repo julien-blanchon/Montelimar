@@ -1,4 +1,4 @@
-import base64
+import base64  # noqa: I001
 import datetime
 import io
 import logging
@@ -14,6 +14,7 @@ from typing import Annotated, Any, cast
 
 import anyio
 import mlx.core as mx
+from mlx.core import clear_cache
 import pydantic
 import requests
 import uvicorn
@@ -22,7 +23,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.routing import APIRoute
-from mlx.core.metal import clear_cache
 from PIL import Image as PILImage
 from transformers.models.nougat.processing_nougat import NougatProcessor
 
@@ -155,8 +155,9 @@ def load_image(filename: str) -> PILImage.Image:
         response.raise_for_status()
         return PILImage.open(io.BytesIO(response.content))
     if filename.startswith("data:"):
-        # Decode base64 encoded image
-        image_data = base64.b64decode(filename[len("data:image/png;base64,") :])
+        header = "data:image/png;base64,"
+        base64_str = filename[len(header) :].replace("\n", "")
+        image_data = base64.b64decode(base64_str)
         return PILImage.open(io.BytesIO(image_data))
     msg = f"Unsupported image source: {filename}"
     logger.error(msg)
