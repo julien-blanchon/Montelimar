@@ -71,13 +71,17 @@
 			userData.state.value = userData.state.value.map((item) =>
 				item.id === uuid ? { ...item, image: convertFileSrc(filename) } : item
 			);
-			let text: string;
+			let text: string | undefined;
 			if (config.type === 'nougat') {
 				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {
 				throw new Error('Invalid method');
+			}
+
+			if (!text) {
+				throw new Error('No text found');
 			}
 
 			animatedTray();

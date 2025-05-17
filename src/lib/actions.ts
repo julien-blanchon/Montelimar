@@ -6,6 +6,7 @@ import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { changeTrayWithEasing } from "./tray";
 import { linear } from "svelte/easing";
+import { ocrOcrPost } from '@/python/client/sdk.gen';
 
 function arrayBufferToBase64(buffer: Uint8Array): string {
     let binary = '';
@@ -64,22 +65,17 @@ export async function requestScreenShot(filename: string, playSound: boolean): P
     return base64;
 }
 
-export async function runNougat(config: ConfigNougat, filename: string): Promise<string> {
-    const response = await fetch('http://127.0.0.1:7771/ocr', {
-        method: 'POST',
-        headers: {
-            accept: 'text/plain',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+export async function runNougat(config: ConfigNougat, filename: string): Promise<string | undefined> {
+    const response = await ocrOcrPost({
+        body: {
             filename: `file:///${filename}`,
             model: config.nougat_config.hf_model_name,
             temperature: config.nougat_config.temperature,
             top_p: config.nougat_config.top_p,
             repetition_penalty: config.nougat_config.repetition_penalty
-        })
+        }
     });
-    return await response.text();
+    return response.data;
 }
 
 export async function runOCR(config: ConfigOCR, image_path: string): Promise<string> {
