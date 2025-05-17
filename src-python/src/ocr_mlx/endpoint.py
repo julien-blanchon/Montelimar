@@ -6,11 +6,13 @@ import os
 import signal
 import socket
 import sys
+import tempfile
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Annotated, Any, cast
 
+import anyio
 import mlx.core as mx
 import pydantic
 import requests
@@ -29,6 +31,19 @@ from ocr_mlx.model.nougat import Nougat
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# Create a temp file for logs
+log_tempfile = tempfile.NamedTemporaryFile(  # noqa: SIM115
+    prefix="ocr_mlx_log_", suffix=".log", delete=False
+)
+log_file_path = log_tempfile.name
+log_tempfile.close()  # Close the file, logging will handle writing
+
+# Add file handler to logger
+file_handler = logging.FileHandler(log_file_path)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logger.addHandler(file_handler)
 
 DEFAULT_PORT_API = 7771
 
@@ -243,8 +258,24 @@ async def shutdown():
     return "Shutting down..."
 
 
+@app.get(
+    "/logs",
+    response_class=PlainTextResponse,
+    summary="Get current log file contents",
+    tags=["logs"],
+)
+async def get_logs():
+    try:
+        async with await anyio.open_file(log_file_path, "r", encoding="utf-8") as f:
+            log_content = f.read()
+    except Exception:
+        logger.exception("Error reading log file")
+        return "Could not read log file."
+    return log_content
+
+
 def main():
-    print("Starting OCR MLX API       !  !")
+    print("Starting OCR MLX API !!!")
 
     def handler(signum: int, frame: Any):  # noqa: ARG001
         print("Caught shutdown signal.")

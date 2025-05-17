@@ -72,7 +72,7 @@
 			);
 			let text: string;
 			if (config.type === 'nougat') {
-				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
+				text = await runWithTimeout(runNougat(config, base64), DEFAULT_TIMEOUT);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {
@@ -98,10 +98,10 @@
 
 			return text;
 		} catch (error) {
-			sendNotification({
-				title: 'Montelimar',
-				body: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-			});
+			// sendNotification({
+			// 	title: 'Montelimar',
+			// 	body: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+			// });
 			// Remove the screenshot from the user data
 			userData.state.value = userData.state.value.filter((item) => item.id !== uuid);
 			console.error(error);

@@ -115,12 +115,12 @@ fn main() {
             tauri::async_runtime::spawn({
                 let app_handle_inner = app_handle_clone.clone();
                 async move {
-                    for i in 0..10 {
+                    for i in 0..20 {
                         if commands::nougat::is_sidecar_nougat_running().await {
                             info!("Sidecar is already running.");
                             return;
                         }
-                        info!("Sidecar not yet running... retry {i}/5");
+                        info!("Sidecar not yet running... retry {i}/20");
                         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                     }
                     info!("Sidecar not running. Launching...");

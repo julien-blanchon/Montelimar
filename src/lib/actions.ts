@@ -59,7 +59,7 @@ export async function requestScreenShot(filename: string, playSound: boolean): P
     return base64;
 }
 
-export async function runNougat(config: ConfigNougat, filename: string): Promise<string> {
+export async function runNougat(config: ConfigNougat, base64: string): Promise<string> {
     const response = await fetch('http://127.0.0.1:7771/ocr', {
         method: 'POST',
         headers: {
@@ -67,7 +67,7 @@ export async function runNougat(config: ConfigNougat, filename: string): Promise
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            filename: `file://${filename}`,
+            filename: `data:image/png;base64,${base64}`,
             model: config.nougat_config.hf_model_name,
             temperature: config.nougat_config.temperature,
             top_p: config.nougat_config.top_p,
@@ -78,7 +78,6 @@ export async function runNougat(config: ConfigNougat, filename: string): Promise
 }
 
 export async function runOCR(config: ConfigOCR, image_path: string): Promise<string> {
-    console.log(config);
     const response = await commands.performOcr(
         image_path,
         config.ocr_config.detection_model_url,
