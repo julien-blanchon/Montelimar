@@ -37,6 +37,7 @@ log_tempfile = tempfile.NamedTemporaryFile(  # noqa: SIM115
     prefix="ocr_mlx_log_", suffix=".log", delete=False
 )
 log_file_path = log_tempfile.name
+print(f"Log file is at: {log_file_path}")
 log_tempfile.close()  # Close the file, logging will handle writing
 
 # Add file handler to logger
@@ -267,7 +268,7 @@ async def shutdown():
 async def get_logs():
     try:
         async with await anyio.open_file(log_file_path, "r", encoding="utf-8") as f:
-            log_content = f.read()
+            log_content = await f.read()
     except Exception:
         logger.exception("Error reading log file")
         return "Could not read log file."
