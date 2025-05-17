@@ -47,6 +47,7 @@
 		isProcessing = true;
 		const uuid = crypto.randomUUID();
 		const filename = `${systemSettings.appDataDirPath}/${uuid}.png`;
+		console.log('filename', filename);
 		const start_time = performance.now();
 		console.log('takeScreenshot', config);
 		if (!userSettings.state.value.disableHistory) {
@@ -72,7 +73,7 @@
 			);
 			let text: string;
 			if (config.type === 'nougat') {
-				text = await runWithTimeout(runNougat(config, base64), DEFAULT_TIMEOUT);
+				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {

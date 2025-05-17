@@ -73,7 +73,7 @@
 			hf_model_name: '',
 			temperature: 0.7,
 			top_p: 0.9,
-			repetition_penalty: 1.1
+			repetition_penalty: 1.9
 		},
 		color: pickRandomColor()
 	});
@@ -131,7 +131,7 @@
 				hf_model_name: '',
 				temperature: 0.7,
 				top_p: 0.9,
-				repetition_penalty: 1.1
+				repetition_penalty: 1.9
 			},
 			color: pickRandomColor()
 		};

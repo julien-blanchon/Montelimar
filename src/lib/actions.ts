@@ -64,7 +64,7 @@ export async function requestScreenShot(filename: string, playSound: boolean): P
     return base64;
 }
 
-export async function runNougat(config: ConfigNougat, base64: string): Promise<string> {
+export async function runNougat(config: ConfigNougat, filename: string): Promise<string> {
     const response = await fetch('http://127.0.0.1:7771/ocr', {
         method: 'POST',
         headers: {
@@ -72,7 +72,7 @@ export async function runNougat(config: ConfigNougat, base64: string): Promise<s
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            filename: `data:image/png;base64,${base64}`,
+            filename: `file:///${filename}`,
             model: config.nougat_config.hf_model_name,
             temperature: config.nougat_config.temperature,
             top_p: config.nougat_config.top_p,
