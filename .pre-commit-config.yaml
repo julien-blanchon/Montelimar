@@ -1,8 +1,0 @@
-repos:
-  - repo: local
-    hooks:
-      - id: bump-version
-        name: Bump Cargo version
-        entry: scripts/bump_version.sh
-        language: script
-        files: ^src-tauri/Cargo\.toml$

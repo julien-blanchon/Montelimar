@@ -2,11 +2,14 @@ import base64
 import datetime
 import io
 import logging
+import os
+import signal
 import socket
+import sys
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
 import mlx.core as mx
 import pydantic
@@ -227,8 +230,30 @@ async def health() -> str:
     return "OK!!!"
 
 
+@app.get(
+    "/shutdown",
+    response_class=PlainTextResponse,
+    summary="Shutdown endpoint",
+    tags=["shutdown"],
+)
+async def shutdown():
+    logger.info("Shutting down...")
+    # Kill the process
+    os.kill(os.getpid(), signal.SIGINT)
+    return "Shutting down..."
+
+
 def main():
     print("Starting OCR MLX API       !  !")
+
+    def handler(signum: int, frame: Any):  # noqa: ARG001
+        print("Caught shutdown signal.")
+        # Clean up anything if needed here
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, handler)
+    signal.signal(signal.SIGINT, handler)
+
     port = find_free_port()
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
 

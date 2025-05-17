@@ -69,3 +69,11 @@ pub async fn launch_sidecar_nougat<'a>(
 
     Ok("Nougat sidecar started and logging.".to_string())
 }
+
+
+#[tauri::command]
+#[specta::specta]
+pub async fn kill_sidecar_nougat() {
+    let client = Client::new();
+    client.get("http://127.0.0.1:7771/shutdown").send().await.unwrap();
+}
