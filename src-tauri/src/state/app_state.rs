@@ -1,12 +1,13 @@
 use std::sync::Mutex;
-
-#[allow(unused)]
+use tauri_plugin_shell::process::CommandChild;
 pub struct AppState {
-    pub app_name: Mutex<String>,
+    pub sidecar_child: Mutex<Option<CommandChild>>,
 }
 
 impl AppState {
     pub fn new() -> Self {
-        Self { app_name: Mutex::new("My Tauri App".to_string()) }
+        Self {
+            sidecar_child: Mutex::new(None),
+        }
     }
 }

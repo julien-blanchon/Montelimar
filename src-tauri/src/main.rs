@@ -11,6 +11,7 @@ use log::{info};
 use specta_typescript::Typescript;
 
 use app::spotlight::utils::WebviewWindowExt;
+use state::AppState;
 use tauri::{Listener, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_specta::{collect_commands, Builder};
@@ -78,6 +79,7 @@ fn main() {
         .setup(move |app| {
             // Mount events for the app
             builder.mount_events(app);
+
             // For SQL: https://github.com/Candid-Engineering/books-db/blob/51986180a3d4b6b02b8f31ace24581f8034ab3f7/src-ui/lib/db/index.ts
 
             // Make the Dock icon invisible
@@ -109,18 +111,27 @@ fn main() {
             });
 
             let app_handle_clone = app_handle.clone();
-            tauri::async_runtime::spawn(async move {
-                if !commands::nougat::is_sidecar_nougat_running().await {
+            tauri::async_runtime::spawn({
+                let app_handle_inner = app_handle_clone.clone();
+                async move {
+                    for i in 0..10 {
+                        if commands::nougat::is_sidecar_nougat_running().await {
+                            info!("Sidecar is already running.");
+                            return;
+                        }
+                        info!("Sidecar not yet running... retry {i}/5");
+                        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    }
+
                     info!("Sidecar not running. Launching...");
-                    if let Err(err) = commands::nougat::launch_sidecar_nougat(app_handle_clone).await {
+                    let state = app_handle_inner.state::<AppState>();
+                    let handle_clone = app_handle_inner.clone();
+                    if let Err(err) = commands::nougat::launch_sidecar_nougat(handle_clone, state).await {
                         log::error!("Error launching sidecar: {}", err);
                     }
-                } else {
-                    info!("Sidecar is already running.");
                 }
             });
-            
-
+                
             Ok(())
         })
         .run(tauri::generate_context!())
