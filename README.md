@@ -18,7 +18,8 @@ A OCR toolbox integrated in your mac
 
 ## Preview
 
-<video controls src="static/MontelimarDemo.mp4" title="Montelimar Demo"></video>
+<video controls width="600" src="https://raw.githubusercontent.com/julien-blanchon/Montelimar/refs/heads/main/static/MontelimarDemo.mp4"></video>
+
 
 ## Features
 
