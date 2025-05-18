@@ -5,7 +5,7 @@ export const userSettings = new RuneStore<{ value: Settings }>('settings', {
     value: {
         configs: [
             {
-                name: 'ocr',
+                name: 'ocsr',
                 id: 1,
                 shortcutKey: null,
                 type: 'ocr',
@@ -17,28 +17,28 @@ export const userSettings = new RuneStore<{ value: Settings }>('settings', {
                 color: '#FFF475',
             },
             {
-                name: 'facebook/nougat-base',
+                name: 'Nougat Base',
                 id: 3,
                 shortcutKey: null,
                 type: 'nougat',
                 nougat_config: {
                     hf_model_name: 'facebook/nougat-base',
-                    temperature: 0.7,
-                    top_p: 0.9,
-                    repetition_penalty: 1.9,
+                    temperature: 0,
+                    top_p: 0,
+                    repetition_penalty: 1,
                 },
                 color: '#F28B82',
             },
             {
-                name: 'facebook/nougat-small',
+                name: 'Nougat Small',
                 id: 2,
                 shortcutKey: null,
                 type: 'nougat',
                 nougat_config: {
                     hf_model_name: 'facebook/nougat-small',
-                    temperature: 0.7,
-                    top_p: 0.9,
-                    repetition_penalty: 1.9,
+                    temperature: 0,
+                    top_p: 0,
+                    repetition_penalty: 1,
                 },
                 color: '#AECBFA',
             },  
