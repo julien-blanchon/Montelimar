@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { ocrOcrPost } from '@/python/client/sdk.gen';
+	import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 	import { cubicOut, linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
@@ -22,10 +24,8 @@
 	import InitSystemSettings from '@/components/plugin/InitSystemSettings.svelte';
 	import { animatedTray, askUserForConfig, runNougat, runOCR, requestScreenShot } from '@/actions';
 	import DisableRightClickMenu from '@/components/plugin/DisableRightClickMenu.svelte';
-	// import ExecuteOnEscape from '@/components/plugin/ExecuteOnEscape.svelte';
 	import { systemSettings } from '@/runes/system_settings.svelte';
 	import InitTauriLog from '@/components/plugin/InitTauriLog.svelte';
-	import SQLiteMigration from '@/components/plugin/SQLiteMigration.svelte';
 	import { TrayIcon } from '@tauri-apps/api/tray';
 	import { changeTrayWithEasing } from '@/tray';
 	import SetupClient from '@/components/plugin/SetupClient.svelte';
@@ -49,6 +49,7 @@
 		isProcessing = true;
 		const uuid = crypto.randomUUID();
 		const filename = `${systemSettings.appDataDirPath}/${uuid}.png`;
+		console.log('filename', filename);
 		const start_time = performance.now();
 		console.log('takeScreenshot', config);
 		if (!userSettings.state.value.disableHistory) {
@@ -72,13 +73,30 @@
 			userData.state.value = userData.state.value.map((item) =>
 				item.id === uuid ? { ...item, image: convertFileSrc(filename) } : item
 			);
-			let text: string;
+			let text: string | undefined;
 			if (config.type === 'nougat') {
-				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
+				text = await runWithTimeout(
+					ocrOcrPost({
+						body: {
+							filename: `file:///${filename}`,
+							model: config.nougat_config.hf_model_name,
+							temperature: config.nougat_config.temperature,
+							top_p: config.nougat_config.top_p,
+							repetition_penalty: config.nougat_config.repetition_penalty
+						},
+						baseUrl: 'http://localhost:7771',
+						fetch: tauriFetch
+					}).then((res) => res.data),
+					DEFAULT_TIMEOUT
+				);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {
 				throw new Error('Invalid method');
+			}
+
+			if (!text) {
+				throw new Error('No text found');
 			}
 
 			animatedTray();
@@ -100,10 +118,10 @@
 
 			return text;
 		} catch (error) {
-			sendNotification({
-				title: 'Montelimar',
-				body: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-			});
+			// sendNotification({
+			// 	title: 'Montelimar',
+			// 	body: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+			// });
 			// Remove the screenshot from the user data
 			userData.state.value = userData.state.value.filter((item) => item.id !== uuid);
 			console.error(error);

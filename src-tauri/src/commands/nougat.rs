@@ -1,35 +1,51 @@
 use tauri_plugin_http::reqwest::Client;
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
+use tauri::{State};
+use crate::state::AppState;
 
 #[tauri::command]
 #[specta::specta]
 pub async fn is_sidecar_nougat_running() -> bool {
     let client = Client::new();
-    client
-        .get("http://127.0.0.1:7771/health")
-        .send()
-        .await
-        .is_ok()
+    match client.get("http://127.0.0.1:7771/health").send().await {
+        Ok(resp) => {
+            log::info!("Health check response: {:?}", resp.status());
+            resp.status().is_success()
+        },
+        Err(e) => {
+            log::warn!("Health check failed: {}", e);
+            false
+        }
+    }
 }
-
 
 
 #[tauri::command]
 #[specta::specta]
-pub async fn launch_sidecar_nougat(handle: tauri::AppHandle) -> Result<String, String> {
+pub async fn launch_sidecar_nougat<'a>(
+    handle: tauri::AppHandle,
+    state: State<'a, AppState>,
+) -> Result<String, String> {
     log::info!("Attempting to launch sidecar: ocr_mlx");
 
-    let mut sidecar_command = handle.shell().sidecar("ocr_mlx").map_err(|e| {
+    let sidecar_command = handle.shell().sidecar("ocr_mlx").map_err(|e| {
         log::error!("Failed to get sidecar: {}", e);
         e.to_string()
     })?;
 
     log::info!("Sidecar command successfully created.");
 
-    let (mut rx, mut _child) = sidecar_command.spawn().map_err(|e| {
+    let (mut rx, child) = sidecar_command.spawn().map_err(|e| {
         log::error!("Failed to spawn sidecar: {}", e);
         e.to_string()
     })?;
+    log::info!("Sidecar process spawned with PID: {:?}", child.pid());
+
+    // ✅ Save child handle in global app state so it can be killed later
+    {
+        let mut child_lock = state.sidecar_child.lock().unwrap();
+        *child_lock = Some(child);
+    }
 
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
@@ -52,4 +68,12 @@ pub async fn launch_sidecar_nougat(handle: tauri::AppHandle) -> Result<String, S
     });
 
     Ok("Nougat sidecar started and logging.".to_string())
+}
+
+
+#[tauri::command]
+#[specta::specta]
+pub async fn kill_sidecar_nougat() {
+    let client = Client::new();
+    client.get("http://127.0.0.1:7771/shutdown").send().await.unwrap();
 }

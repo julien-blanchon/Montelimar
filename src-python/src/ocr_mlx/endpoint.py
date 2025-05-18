@@ -1,14 +1,20 @@
-import base64
+import base64  # noqa: I001
 import datetime
 import io
 import logging
+import os
+import signal
 import socket
+import sys
+import tempfile
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
+import anyio
 import mlx.core as mx
+from mlx.core import clear_cache
 import pydantic
 import requests
 import uvicorn
@@ -17,8 +23,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.routing import APIRoute
-from mlx.core.metal import clear_cache
 from PIL import Image as PILImage
+from PIL import ImageOps
 from transformers.models.nougat.processing_nougat import NougatProcessor
 
 from ocr_mlx.inference.generate import generate
@@ -26,6 +32,20 @@ from ocr_mlx.model.nougat import Nougat
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# Create a temp file for logs
+log_tempfile = tempfile.NamedTemporaryFile(  # noqa: SIM115
+    prefix="ocr_mlx_log_", suffix=".log", delete=False
+)
+log_file_path = log_tempfile.name
+print(f"Log file is at: {log_file_path}")
+log_tempfile.close()  # Close the file, logging will handle writing
+
+# Add file handler to logger
+file_handler = logging.FileHandler(log_file_path)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logger.addHandler(file_handler)
 
 DEFAULT_PORT_API = 7771
 
@@ -136,8 +156,9 @@ def load_image(filename: str) -> PILImage.Image:
         response.raise_for_status()
         return PILImage.open(io.BytesIO(response.content))
     if filename.startswith("data:"):
-        # Decode base64 encoded image
-        image_data = base64.b64decode(filename[len("data:image/png;base64,") :])
+        header = "data:image/png;base64,"
+        base64_str = filename[len(header) :].replace("\n", "")
+        image_data = base64.b64decode(base64_str)
         return PILImage.open(io.BytesIO(image_data))
     msg = f"Unsupported image source: {filename}"
     logger.error(msg)
@@ -180,6 +201,13 @@ class OCRRequest(pydantic.BaseModel):
             ge=1.0,
         ),
     ]
+    padding: Annotated[
+        int | None,
+        pydantic.Field(
+            default=None,
+            description="Padding",
+        ),
+    ]
 
 
 @app.post(
@@ -194,9 +222,19 @@ async def ocr(request: OCRRequest) -> str | None:
             # Load and preprocess image
             image = load_image(request.filename).convert("RGB")
 
+            # If padding is not None add a white padding border to the image
+            if request.padding is not None:
+                image = ImageOps.expand(image, border=request.padding, fill="white")
+
             pixel_values = mx.array(
                 nougat_processor(image, return_tensors="np").pixel_values
             ).transpose(0, 2, 3, 1)
+
+            # If repetition penalty is 1.0, set it to None (no repetition penalty)
+            # TODO: This not very clean because this is not the expected behavior
+            # But I prefer this than having to change the frontend code
+            if request.repetition_penalty == 1.0:
+                request.repetition_penalty = None
 
             # Generate text from model
             outputs = generate(
@@ -227,8 +265,46 @@ async def health() -> str:
     return "OK!!!"
 
 
+@app.get(
+    "/shutdown",
+    response_class=PlainTextResponse,
+    summary="Shutdown endpoint",
+    tags=["shutdown"],
+)
+async def shutdown():
+    logger.info("Shutting down...")
+    # Kill the process
+    os.kill(os.getpid(), signal.SIGINT)
+    return "Shutting down..."
+
+
+@app.get(
+    "/logs",
+    response_class=PlainTextResponse,
+    summary="Get current log file contents",
+    tags=["logs"],
+)
+async def get_logs():
+    try:
+        async with await anyio.open_file(log_file_path, "r", encoding="utf-8") as f:
+            log_content = await f.read()
+    except Exception:
+        logger.exception("Error reading log file")
+        return "Could not read log file."
+    return log_content
+
+
 def main():
-    print("Starting OCR MLX API       !  !")
+    print("Starting OCR MLX API !!!")
+
+    def handler(signum: int, frame: Any):  # noqa: ARG001
+        print("Caught shutdown signal.")
+        # Clean up anything if needed here
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, handler)
+    signal.signal(signal.SIGINT, handler)
+
     port = find_free_port()
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
 

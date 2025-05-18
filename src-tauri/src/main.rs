@@ -11,7 +11,8 @@ use log::{info};
 use specta_typescript::Typescript;
 
 use app::spotlight::utils::WebviewWindowExt;
-use tauri::{Listener, Manager};
+use state::AppState;
+use tauri::{Listener, Manager, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_specta::{collect_commands, Builder};
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
@@ -39,6 +40,7 @@ fn main() {
         // Nougat
         commands::nougat::launch_sidecar_nougat,
         commands::nougat::is_sidecar_nougat_running,
+        commands::nougat::kill_sidecar_nougat,
     ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -46,7 +48,7 @@ fn main() {
         .export(Typescript::default(), "../src/lib/tauri/bindings.ts")
         .expect("Failed to export typescript bindings");
 
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state::AppState::new())
@@ -78,6 +80,7 @@ fn main() {
         .setup(move |app| {
             // Mount events for the app
             builder.mount_events(app);
+
             // For SQL: https://github.com/Candid-Engineering/books-db/blob/51986180a3d4b6b02b8f31ace24581f8034ab3f7/src-ui/lib/db/index.ts
 
             // Make the Dock icon invisible
@@ -109,20 +112,61 @@ fn main() {
             });
 
             let app_handle_clone = app_handle.clone();
-            tauri::async_runtime::spawn(async move {
-                if !commands::nougat::is_sidecar_nougat_running().await {
+            tauri::async_runtime::spawn({
+                let app_handle_inner = app_handle_clone.clone();
+                async move {
+                    for i in 0..3 {
+                        if commands::nougat::is_sidecar_nougat_running().await {
+                            info!("Sidecar is already running.");
+                            return;
+                        }
+                        info!("Sidecar not yet running... retry {i}/3");
+                        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    }
                     info!("Sidecar not running. Launching...");
-                    if let Err(err) = commands::nougat::launch_sidecar_nougat(app_handle_clone).await {
+                    let state = app_handle_inner.state::<AppState>();
+                    let handle_clone = app_handle_inner.clone();
+                    if let Err(err) = commands::nougat::launch_sidecar_nougat(handle_clone, state).await {
                         log::error!("Error launching sidecar: {}", err);
                     }
-                } else {
-                    info!("Sidecar is already running.");
                 }
             });
-            
-
             Ok(())
         })
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
+    app.run(move |_app_handle, _event| {
+        // #[cfg(all(desktop, not(test)))]
+        match &_event {
+          RunEvent::ExitRequested { api, code, .. } => {
+            // Keep the event loop running even if all windows are closed
+            // This allow us to catch tray icon events when there is no window
+            // if we manually requested an exit (code is Some(_)) we will let it go through
+            info!("ExitRequested (UNIX)");
+            // Kill the sidecar
+            tauri::async_runtime::spawn(async move {
+                commands::nougat::kill_sidecar_nougat().await;
+            });
+            if code.is_none() {
+              api.prevent_exit();
+            }
+          }
+          RunEvent::WindowEvent {
+            event: tauri::WindowEvent::CloseRequested { api, .. },
+            label,
+            ..
+          } => {
+            info!("ExitRequested (Windows)");
+            // run the window destroy manually just for fun :)
+            // usually you'd show a dialog here to ask for confirmation or whatever
+            api.prevent_close();
+            _app_handle
+              .get_webview_window(label)
+              .unwrap()
+              .destroy()
+              .unwrap();
+          }
+          _ => (),
+        }
+    });
 }

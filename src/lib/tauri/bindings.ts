@@ -67,6 +67,9 @@ async launchSidecarNougat() : Promise<Result<string, string>> {
 },
 async isSidecarNougatRunning() : Promise<boolean> {
     return await TAURI_INVOKE("is_sidecar_nougat_running");
+},
+async killSidecarNougat() : Promise<void> {
+    await TAURI_INVOKE("kill_sidecar_nougat");
 }
 }
 

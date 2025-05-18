@@ -3,12 +3,10 @@
 opt-level = 3
 debug = false
 
-
 # Build in release mode to avoid long compilation times
 [profile.dev.package.rten]
 opt-level = 3
 debug = false
-
 
 # Build in release mode to avoid long compilation times
 [profile.dev.package.rten_imageproc]

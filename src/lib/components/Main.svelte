@@ -221,9 +221,7 @@
 												}}
 												class="group/copy flex h-1/2 w-full items-center justify-center gap-2 rounded-t-md bg-blue-500/10 p-2 transition-colors hover:bg-blue-500/20 active:bg-blue-500/40"
 											>
-												<Copy
-													class="size-5 text-blue-500 transition-transform duration-100 ease-out group-active/copy:rotate-180 group-active/copy:scale-125"
-												/>
+												<Copy class="size-5 text-blue-500" />
 											</button>
 											<button
 												onclick={() => {
