@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.routing import APIRoute
 from PIL import Image as PILImage
+from PIL import ImageOps
 from transformers.models.nougat.processing_nougat import NougatProcessor
 
 from ocr_mlx.inference.generate import generate
@@ -200,6 +201,13 @@ class OCRRequest(pydantic.BaseModel):
             ge=1.0,
         ),
     ]
+    padding: Annotated[
+        int | None,
+        pydantic.Field(
+            default=None,
+            description="Padding",
+        ),
+    ]
 
 
 @app.post(
@@ -214,9 +222,19 @@ async def ocr(request: OCRRequest) -> str | None:
             # Load and preprocess image
             image = load_image(request.filename).convert("RGB")
 
+            # If padding is not None add a white padding border to the image
+            if request.padding is not None:
+                image = ImageOps.expand(image, border=request.padding, fill="white")
+
             pixel_values = mx.array(
                 nougat_processor(image, return_tensors="np").pixel_values
             ).transpose(0, 2, 3, 1)
+
+            # If repetition penalty is 1.0, set it to None (no repetition penalty)
+            # TODO: This not very clean because this is not the expected behavior
+            # But I prefer this than having to change the frontend code
+            if request.repetition_penalty == 1.0:
+                request.repetition_penalty = None
 
             # Generate text from model
             outputs = generate(

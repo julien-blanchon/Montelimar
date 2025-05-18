@@ -11,10 +11,10 @@ A OCR toolbox integrated in your mac
 
 
 [![Apache 2 License](https://img.shields.io/badge/License-Apache-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Tauri](https://img.shields.io/badge/Tauri-2-blue.svg)](https://tauri.app)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-blue.svg)](https://tauri.app)
 [![Svelte](https://img.shields.io/badge/Svelte-5-orange.svg)](https://svelte.dev)
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
-[![Rust](https://img.shields.io/badge/Rust-2021-orange.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/Rust-orange.svg)](https://www.rust-lang.org)
 
 ## Preview
 
@@ -26,7 +26,7 @@ A OCR toolbox integrated in your mac
 
 - 🔍 **Advanced OCR Capabilities**
   - Text extraction from any part of your screen
-  - LaTeX equation recognition and conversion with Nougat model
+  - LaTeX equation recognition and conversion with [Nougat model](https://huggingface.co/Norm/nougat-latex-base)
   - Support for multiple [OCRS](https://github.com/robertknight/ocrs/) models and [Nougat](https://huggingface.co/facebook/nougat-base) models.
 
 - ⚡ **Quick Access**
@@ -60,7 +60,15 @@ A OCR toolbox integrated in your mac
 
 ## Installation
 
-<!-- Installation with the dmg in Release -->
+To install Montelimar with Homebrew:
+```shell
+# First add the homebrew tap
+brew tap julien-blanchon/homebrew-tap
+# Then install montelimar
+brew install --cask montelimar
+```
+
+You can also manually download the .dmg in the [Github Release section](https://github.com/julien-blanchon/Montelimar/releases).
 
 ## Getting Started
 
@@ -151,23 +159,11 @@ The built application will be available in `src-tauri/target/release`.
 - `bun run icon:generate` - Generate app icons from SVG
 - `bun run icon:generate-tray` - Generate animated tray icons
 
-### Development Tools
-
-- SvelteKit 5 with Runes for reactive frontend
-- Tauri v2 for native capabilities
-- Tailwind CSS + DaisyUI for styling
-- MLX-Nougat for efficient OCR processing
-- SQLite with Drizzle ORM for data persistence
-- TypeScript for type safety
-- Python sidecar with FastAPI for OCR service
-
-> Note: The Python sidecar is automatically rebuilt when changes are detected in the src-python directory. The build process is managed by the `pretauri` script.
-
 ## Contributing
 
 Contributions are always welcome!
 
-See `contributing.md` for ways to get started.
+See `Contributing.md` for ways to get started.
 
 ## Roadmap
 
@@ -176,6 +172,8 @@ See `contributing.md` for ways to get started.
   - [ ] Table structure recognition and export to Excel/CSV
   - [ ] Chemical formula recognition
   - [ ] Multi-language support with language auto-detection
+
+- [ ] **Support remote OCR endpoint (Mistral ...)**
 
 - [ ] **Unified processing backend**
 

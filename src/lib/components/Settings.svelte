@@ -180,7 +180,7 @@
 
 	let rating = $state(3);
 
-	$effect(() => {
+	onMount(() => {
 		let unlistenPromise = attachLogger(({ level, message }) => {
 			logs = [...logs, `[${level}] ${message}`];
 			if (logs.length > 500) logs = logs.slice(-500);
@@ -1126,8 +1126,8 @@
 					<p class="text-sm font-medium">Special Thanks</p>
 					<p class="text-sm text-base-content/60">
 						Thanks to the amazing open-source community and all the contributors who made this
-						project possible. Special thanks to the Tauri, Svelte, and Rust teams for their
-						incredible work.
+						project possible. Special thanks to Robert Knight for the amazing RTEN and OCRS
+						libraries.
 					</p>
 				</div>
 
