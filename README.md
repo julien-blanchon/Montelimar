@@ -18,9 +18,7 @@ A OCR toolbox integrated in your mac
 
 ## Preview
 
-| Dark                             | Light                             |
-| -------------------------------- | --------------------------------- |
-| ... | ... |
+<video controls src="static/MontelimarDemo.mp4" title="Montelimar Demo"></video>
 
 ## Features
 
