@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { ocrOcrPost } from '@/python/client/sdk.gen';
+	import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 	import { cubicOut, linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
@@ -73,7 +75,20 @@
 			);
 			let text: string | undefined;
 			if (config.type === 'nougat') {
-				text = await runWithTimeout(runNougat(config, filename), DEFAULT_TIMEOUT);
+				text = await runWithTimeout(
+					ocrOcrPost({
+						body: {
+							filename: `file:///${filename}`,
+							model: config.nougat_config.hf_model_name,
+							temperature: config.nougat_config.temperature,
+							top_p: config.nougat_config.top_p,
+							repetition_penalty: config.nougat_config.repetition_penalty
+						},
+						baseUrl: 'http://localhost:7771',
+						fetch: tauriFetch
+					}).then((res) => res.data),
+					DEFAULT_TIMEOUT
+				);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else {
