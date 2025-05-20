@@ -165,49 +165,72 @@ def load_image(filename: str) -> PILImage.Image:
     raise ValueError(msg)
 
 
+def pil_to_base64(pil_image: PILImage.Image, format="PNG") -> str:
+    buffered = io.BytesIO()
+    # Ensure image is RGB before saving for formats like JPEG
+    if format == "JPEG" and pil_image.mode != "RGB":
+        pil_image = pil_image.convert("RGB")
+    pil_image.save(buffered, format=format)
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+
+class VLMConfigRequest(pydantic.BaseModel):
+    model_name: str = "gpt-4-vision-preview"
+    api_key: str
+    base_url: str = "https://api.openai.com/v1"
+    system_prompt: str = "Describe the image."
+    max_tokens: int = 300
+    temperature: float = 0.7
+    # Add other VLM specific fields if necessary
+
+
 class OCRRequest(pydantic.BaseModel):
-    filename: Annotated[str, pydantic.Field(default="", description="Filename")]
+    filename: Annotated[str, pydantic.Field(default="", description="Filename or image URL or base64 data URI")]
+    type: Annotated[str, pydantic.Field(default="nougat", description="Type of OCR model (nougat or vlm)")]
+    vlm_config: VLMConfigRequest | None = None
+
+    # Nougat specific fields - made optional
     model: Annotated[
-        str,
+        str | None,
         pydantic.Field(
             default="facebook/nougat-small",
-            description="Model name or path",
+            description="Model name or path (for Nougat)",
             examples=["facebook/nougat-small", "facebook/nougat-large"],
         ),
-    ]
+    ] = "facebook/nougat-small"
     temperature: Annotated[
-        float,
+        float | None,
         pydantic.Field(
             default=0.0,
-            description="Sampling temperature",
+            description="Sampling temperature (for Nougat)",
             ge=0.0,
             le=1.0,
         ),
-    ]
+    ] = 0.0
     top_p: Annotated[
-        float,
+        float | None,
         pydantic.Field(
             default=0.0,
-            description="Top-p sampling threshold",
+            description="Top-p sampling threshold (for Nougat)",
             ge=0.0,
             le=1.0,
         ),
-    ]
+    ] = 0.0
     repetition_penalty: Annotated[
         float | None,
         pydantic.Field(
             default=None,
-            description="Repetition penalty",
+            description="Repetition penalty (for Nougat)",
             ge=1.0,
         ),
-    ]
+    ] = None
     padding: Annotated[
         int | None,
         pydantic.Field(
             default=None,
-            description="Padding",
+            description="Padding (for Nougat)",
         ),
-    ]
+    ] = None
 
 
 @app.post(
@@ -217,42 +240,114 @@ class OCRRequest(pydantic.BaseModel):
     tags=["ocr"],
 )
 async def ocr(request: OCRRequest) -> str | None:
-    with STATE.lifespan(request.model) as (nougat_model, nougat_processor):
+    if request.type == "vlm":
+        if not request.vlm_config:
+            logger.error("VLM config not provided for VLM request type.")
+            return "Error: VLM configuration is required for VLM request type."
+
         try:
-            # Load and preprocess image
-            image = load_image(request.filename).convert("RGB")
+            image_pil = load_image(request.filename)
+            # Determine image format, default to PNG if not obvious
+            image_format = "JPEG" if request.filename.lower().endswith(".jpg") or request.filename.lower().endswith(".jpeg") else "PNG"
+            
+            # If filename is already a base64 string, extract it.
+            if request.filename.startswith("data:image"):
+                base64_encoded_image = request.filename.split(",")[1]
+                # Potentially update image_format based on the data URI if needed
+                if "data:image/jpeg" in request.filename:
+                    image_format = "JPEG"
+                elif "data:image/png" in request.filename:
+                    image_format = "PNG"
+                # Add more formats if necessary
+            else:
+                base64_encoded_image = pil_to_base64(image_pil, format=image_format)
 
-            # If padding is not None add a white padding border to the image
-            if request.padding is not None:
-                image = ImageOps.expand(image, border=request.padding, fill="white")
 
-            pixel_values = mx.array(
-                nougat_processor(image, return_tensors="np").pixel_values
-            ).transpose(0, 2, 3, 1)
-
-            # If repetition penalty is 1.0, set it to None (no repetition penalty)
-            # TODO: This not very clean because this is not the expected behavior
-            # But I prefer this than having to change the frontend code
-            if request.repetition_penalty == 1.0:
-                request.repetition_penalty = None
-
-            # Generate text from model
-            outputs = generate(
-                nougat_model,
-                pixel_values,
-                max_new_tokens=4096,
-                eos_token_id=nougat_processor.tokenizer.eos_token_id,  # type: ignore
-                temperature=request.temperature,
-                top_p=request.top_p,
-                repetition_penalty=request.repetition_penalty,
+            headers = {
+                "Authorization": f"Bearer {request.vlm_config.api_key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": request.vlm_config.model_name,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": request.vlm_config.system_prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/{image_format.lower()};base64,{base64_encoded_image}"
+                                },
+                            },
+                        ],
+                    }
+                ],
+                "max_tokens": request.vlm_config.max_tokens,
+                "temperature": request.vlm_config.temperature,
+            }
+            
+            logger.info("Sending request to VLM API: %s", f"{request.vlm_config.base_url}/chat/completions")
+            response = requests.post(
+                f"{request.vlm_config.base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=60,
             )
-            result_text = nougat_processor.tokenizer.decode(outputs)  # type: ignore
-        except Exception as e:
-            msg = f"Error during OCR: {e!s}"
-            logger.exception(msg)
-            return None
-        else:
+            response.raise_for_status()
+            result_text = response.json()["choices"][0]["message"]["content"]
             return result_text
+        except requests.exceptions.RequestException as e:
+            msg = f"Error calling VLM API: {e!s}"
+            logger.exception(msg)
+            return f"Error: {msg}"
+        except Exception as e:
+            msg = f"Error during VLM processing: {e!s}"
+            logger.exception(msg)
+            return f"Error: {msg}"
+
+    elif request.type == "nougat":
+        if not request.model:
+            logger.error("Model not provided for Nougat request type.")
+            return "Error: Model name is required for Nougat request type."
+        
+        with STATE.lifespan(request.model) as (nougat_model, nougat_processor):
+            try:
+                # Load and preprocess image
+                image = load_image(request.filename).convert("RGB")
+
+                # If padding is not None add a white padding border to the image
+                if request.padding is not None:
+                    image = ImageOps.expand(image, border=request.padding, fill="white")
+
+                pixel_values = mx.array(
+                    nougat_processor(image, return_tensors="np").pixel_values
+                ).transpose(0, 2, 3, 1)
+
+                # If repetition penalty is 1.0, set it to None (no repetition penalty)
+                if request.repetition_penalty == 1.0:
+                    request.repetition_penalty = None
+
+                # Generate text from model
+                outputs = generate(
+                    nougat_model,
+                    pixel_values,
+                    max_new_tokens=4096,
+                    eos_token_id=nougat_processor.tokenizer.eos_token_id,  # type: ignore
+                    temperature=request.temperature if request.temperature is not None else 0.0,
+                    top_p=request.top_p if request.top_p is not None else 0.0,
+                    repetition_penalty=request.repetition_penalty,
+                )
+                result_text = nougat_processor.tokenizer.decode(outputs)  # type: ignore
+            except Exception as e:
+                msg = f"Error during Nougat OCR: {e!s}"
+                logger.exception(msg)
+                return None # Keep existing behavior of returning None for Nougat errors
+            else:
+                return result_text
+    else:
+        logger.error(f"Unsupported request type: {request.type}")
+        return "Error: Unsupported request type. Must be 'nougat' or 'vlm'."
 
 
 @app.get(

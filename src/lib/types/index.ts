@@ -44,7 +44,23 @@ export interface ConfigOCR {
     color: string;
 }
 
-export type Config = ConfigNougat | ConfigOCR;
+export interface ConfigVLM {
+    name: string;
+    id: number;
+    shortcutKey: ShortcutKey | null;
+    type: 'vlm'; // Literal type
+    vlm_config: {
+        model_name: string; // e.g., "gpt-4-vision-preview"
+        api_key: string;
+        base_url: string; // e.g., "https://api.openai.com/v1"
+        system_prompt: string;
+        max_tokens: number;
+        temperature: number;
+    };
+    color: string;
+}
+
+export type Config = ConfigNougat | ConfigOCR | ConfigVLM;
 
 
 export interface Settings {

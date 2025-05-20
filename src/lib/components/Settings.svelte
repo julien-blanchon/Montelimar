@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { attachLogger } from '@tauri-apps/plugin-log';
-	import type { ConfigNougat, ConfigOCR } from '@/types';
+	import type { ConfigNougat, ConfigOCR, ConfigVLM } from '@/types';
 	import { getVersion } from '@tauri-apps/api/app';
 	import { userSettings } from '@/runes/user_settings.svelte';
 	import {
@@ -40,6 +40,7 @@
 	let editingConfig: string | null = $state(null);
 	let isAddingNew = $state(false);
 	let isNougatConfig = $state(true);
+	let isVLMConfig = $state(false); // New state for VLM
 	let saveConfirmationId: number | null = $state(null);
 	let saveConfirmationIndex: number | null = $state(null);
 	let logs: string[] = $state([]);
@@ -91,6 +92,22 @@
 		color: pickRandomColor()
 	});
 
+	let newVLMConfig: ConfigVLM = $state({
+		id: 0,
+		name: '',
+		type: 'vlm',
+		shortcutKey: null,
+		vlm_config: {
+			model_name: 'gpt-4-vision-preview',
+			api_key: '',
+			base_url: 'https://api.openai.com/v1',
+			system_prompt: 'Describe the image accurately and concisely.',
+			max_tokens: 300,
+			temperature: 0.7
+		},
+		color: pickRandomColor()
+	});
+
 	function handleConsider(e: CustomEvent) {
 		const {
 			items: newItems,
@@ -122,6 +139,8 @@
 	function cancelEditing() {
 		editingConfig = null;
 		isAddingNew = false;
+		isNougatConfig = true; // Default to Nougat when not adding/editing
+		isVLMConfig = false; // Reset VLM flag
 		newNougatConfig = {
 			id: 0,
 			name: '',
@@ -147,15 +166,39 @@
 			},
 			color: pickRandomColor()
 		};
+		newVLMConfig = { // Reset VLM config object
+			id: 0,
+			name: '',
+			type: 'vlm',
+			shortcutKey: null,
+			vlm_config: {
+				model_name: 'gpt-4-vision-preview',
+				api_key: '',
+				base_url: 'https://api.openai.com/v1',
+				system_prompt: 'Describe the image accurately and concisely.',
+				max_tokens: 300,
+				temperature: 0.7
+			},
+			color: pickRandomColor()
+		};
 	}
 
 	function saveConfig() {
 		if (isAddingNew) {
-			const config = isNougatConfig ? newNougatConfig : newOCRConfig;
-			if (config.name) {
+			let configToAdd;
+			if (isVLMConfig) { // Check VLM first
+				configToAdd = newVLMConfig;
+			} else if (isNougatConfig) {
+				configToAdd = newNougatConfig;
+			} else { // OCR
+				configToAdd = newOCRConfig;
+			}
+
+			if (configToAdd.name) {
 				const nextId = getNextId();
 				userSettings.state.value.configs = [
-					{ ...config, id: nextId },
+					// @ts-expect-error - this is fine, type is Config
+					{ ...configToAdd, id: nextId },
 					...userSettings.state.value.configs
 				];
 				saveConfirmationId = nextId;
@@ -208,16 +251,17 @@
 							'disabled:cursor-not-allowed disabled:opacity-50',
 							'data-[active=true]:border-primary/20 data-[active=true]:bg-primary/10 data-[active=true]:text-primary'
 						)}
-						data-active={isNougatConfig && isAddingNew}
+						data-active={isNougatConfig && !isVLMConfig && isAddingNew}
 						onclick={() => {
 							if (!isAddingNew) {
 								isNougatConfig = true;
+								isVLMConfig = false;
 								isAddingNew = true;
 							} else {
 								cancelEditing();
 							}
 						}}
-						disabled={isAddingNew && !isNougatConfig}
+						disabled={isAddingNew && (!isNougatConfig || isVLMConfig)}
 					>
 						<FileText class="size-4 text-base-content/70 group-data-[active=true]:text-primary" />
 						Add Nougat
@@ -230,19 +274,43 @@
 							'disabled:cursor-not-allowed disabled:opacity-50',
 							'data-[active=true]:border-primary/20 data-[active=true]:bg-primary/10 data-[active=true]:text-primary'
 						)}
-						data-active={!isNougatConfig && isAddingNew}
+						data-active={!isNougatConfig && !isVLMConfig && isAddingNew}
 						onclick={() => {
 							if (!isAddingNew) {
+								isNougatConfig = false;
+								isVLMConfig = false;
+								isAddingNew = true;
+							} else {
+								cancelEditing();
+							}
+						}}
+						disabled={isAddingNew && (isNougatConfig || isVLMConfig)}
+					>
+						<Camera class="size-4 text-base-content/70 group-data-[active=true]:text-primary" />
+						Add OCRs
+					</button>
+					<button
+						class={cn(
+							'group',
+							'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+							'border border-base-300 bg-base-200/50 hover:bg-base-300/80',
+							'disabled:cursor-not-allowed disabled:opacity-50',
+							'data-[active=true]:border-primary/20 data-[active=true]:bg-primary/10 data-[active=true]:text-primary'
+						)}
+						data-active={isVLMConfig && !isNougatConfig && isAddingNew}
+						onclick={() => {
+							if (!isAddingNew) {
+								isVLMConfig = true;
 								isNougatConfig = false;
 								isAddingNew = true;
 							} else {
 								cancelEditing();
 							}
 						}}
-						disabled={isAddingNew && isNougatConfig}
+						disabled={isAddingNew && (!isVLMConfig || isNougatConfig)}
 					>
-						<Camera class="size-4 text-base-content/70 group-data-[active=true]:text-primary" />
-						Add OCRs
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles size-4 text-base-content/70 group-data-[active=true]:text-primary"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+						Add VLM
 					</button>
 				</div>
 			</div>
@@ -263,7 +331,7 @@
 							}
 						}}
 					>
-						{#if isNougatConfig}
+						{#if isNougatConfig && !isVLMConfig}
 							<div class="flex gap-4">
 								<div class="form-control flex-1">
 									<label class="label" for="new-config-name">
@@ -376,7 +444,7 @@
 									bind:value={newNougatConfig.nougat_config.repetition_penalty}
 								/>
 							</div>
-						{:else}
+						{:else if !isNougatConfig && !isVLMConfig}
 							<div class="flex gap-4">
 								<div class="form-control flex-1">
 									<label class="label" for="new-config-name">
@@ -473,6 +541,161 @@
 										bind:checked={newOCRConfig.ocr_config.disableLineBreaks}
 									/>
 								</label>
+							</div>
+						{:else if isVLMConfig}
+							<!-- VLM Config Form -->
+							<div class="flex gap-4">
+								<div class="form-control flex-1">
+									<label class="label" for="new-vlm-config-name">
+										<span class="label-text">Name</span>
+									</label>
+									<input
+										id="new-vlm-config-name"
+										type="text"
+										placeholder="Name"
+										class={cn(
+											'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+											'focus:border-primary/20 focus:bg-base-100',
+											'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+											'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+											'w-full'
+										)}
+										required
+										bind:value={newVLMConfig.name}
+									/>
+								</div>
+								<div class="form-control w-24">
+									<label class="label" for="new-vlm-config-color">
+										<span class="label-text">Color</span>
+									</label>
+									<input
+										id="new-vlm-config-color"
+										type="color"
+										class="h-9 w-full rounded-md border border-base-300 bg-base-200/50 p-1 transition-colors focus:border-primary/20 focus:bg-base-100"
+										bind:value={newVLMConfig.color}
+									/>
+								</div>
+							</div>
+
+							<div class="form-control">
+								<label class="label" for="new-vlm-config-shortcut">
+									<span class="label-text">Shortcut</span>
+									<span class="label-text-alt">Press shortcut to trigger this config</span>
+								</label>
+								<InputShortcut bind:value={newVLMConfig.shortcutKey} />
+							</div>
+
+							<div class="form-control">
+								<label class="label" for="vlm-model-name">
+									<span class="label-text">Model Name</span>
+									<span class="label-text-alt">e.g., "gpt-4-vision-preview"</span>
+								</label>
+								<input
+									id="vlm-model-name"
+									type="text"
+									placeholder="gpt-4-vision-preview"
+									class={cn(
+										'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+										'focus:border-primary/20 focus:bg-base-100',
+										'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+										'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+										'w-full'
+									)}
+									required
+									bind:value={newVLMConfig.vlm_config.model_name}
+								/>
+							</div>
+							<div class="form-control">
+								<label class="label" for="vlm-api-key">
+									<span class="label-text">API Key</span>
+									<span class="label-text-alt">Your API Key for the VLM provider</span>
+								</label>
+								<input
+									id="vlm-api-key"
+									type="password"
+									placeholder="sk-xxxxxxxxxxxxxxxxxxxxxx"
+									class={cn(
+										'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+										'focus:border-primary/20 focus:bg-base-100',
+										'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+										'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+										'w-full'
+									)}
+									required
+									bind:value={newVLMConfig.vlm_config.api_key}
+								/>
+							</div>
+							<div class="form-control">
+								<label class="label" for="vlm-base-url">
+									<span class="label-text">Base URL</span>
+									<span class="label-text-alt">e.g., "https://api.openai.com/v1"</span>
+								</label>
+								<input
+									id="vlm-base-url"
+									type="text"
+									placeholder="https://api.openai.com/v1"
+									class={cn(
+										'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+										'focus:border-primary/20 focus:bg-base-100',
+										'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+										'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+										'w-full'
+									)}
+									required
+									pattern="^https?://.*"
+									bind:value={newVLMConfig.vlm_config.base_url}
+								/>
+							</div>
+							<div class="form-control">
+								<label class="label" for="vlm-system-prompt">
+									<span class="label-text">System Prompt</span>
+									<span class="label-text-alt">Instructions for the VLM model</span>
+								</label>
+								<textarea
+									id="vlm-system-prompt"
+									class={cn(
+										'min-h-[80px] rounded-md border border-base-300 bg-base-200/50 px-3 py-2 text-sm transition-colors',
+										'focus:border-primary/20 focus:bg-base-100',
+										'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+										'w-full'
+									)}
+									placeholder="Describe the image accurately and concisely."
+									bind:value={newVLMConfig.vlm_config.system_prompt}
+								></textarea>
+							</div>
+							<div class="form-control">
+								<label class="label" for="vlm-max-tokens">
+									<span class="label-text">Max Tokens ({newVLMConfig.vlm_config.max_tokens})</span>
+									<span class="label-text-alt">Maximum number of tokens to generate</span>
+								</label>
+								<input
+									id="vlm-max-tokens"
+									type="number"
+									min="1"
+									step="1"
+									class={cn(
+										'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+										'focus:border-primary/20 focus:bg-base-100',
+										'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+										'w-full'
+									)}
+									bind:value={newVLMConfig.vlm_config.max_tokens}
+								/>
+							</div>
+							<div class="form-control">
+								<label class="label" for="vlm-temperature">
+									<span class="label-text">Temperature ({newVLMConfig.vlm_config.temperature})</span>
+									<span class="label-text-alt">Controls randomness</span>
+								</label>
+								<input
+									id="vlm-temperature"
+									type="range"
+									min="0"
+									max="1"
+									step="0.1"
+									class="range range-xs"
+									bind:value={newVLMConfig.vlm_config.temperature}
+								/>
 							</div>
 						{/if}
 
@@ -646,7 +869,7 @@
 												/>
 											</div>
 										</div>
-									{:else}
+									{:else if config.type === 'ocr'}
 										<div class="space-y-4">
 											<div class="form-control">
 												<label class="label" for="detection-url">
@@ -704,6 +927,121 @@
 														bind:checked={config.ocr_config.disableLineBreaks}
 													/>
 												</label>
+											</div>
+										</div>
+									{:else if config.type === 'vlm'}
+										<div class="space-y-4">
+											<div class="form-control">
+												<label class="label" for="vlm-edit-model-name">
+													<span class="label-text">Model Name</span>
+													<span class="label-text-alt">e.g., "gpt-4-vision-preview"</span>
+												</label>
+												<input
+													id="vlm-edit-model-name"
+													type="text"
+													placeholder="gpt-4-vision-preview"
+													class={cn(
+														'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+														'focus:border-primary/20 focus:bg-base-100',
+														'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+														'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+														'w-full'
+													)}
+													required
+													bind:value={config.vlm_config.model_name}
+												/>
+											</div>
+											<div class="form-control">
+												<label class="label" for="vlm-edit-api-key">
+													<span class="label-text">API Key</span>
+													<span class="label-text-alt">Your API Key for the VLM provider</span>
+												</label>
+												<input
+													id="vlm-edit-api-key"
+													type="password"
+													placeholder="sk-xxxxxxxxxxxxxxxxxxxxxx"
+													class={cn(
+														'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+														'focus:border-primary/20 focus:bg-base-100',
+														'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+														'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+														'w-full'
+													)}
+													required
+													bind:value={config.vlm_config.api_key}
+												/>
+											</div>
+											<div class="form-control">
+												<label class="label" for="vlm-edit-base-url">
+													<span class="label-text">Base URL</span>
+													<span class="label-text-alt">e.g., "https://api.openai.com/v1"</span>
+												</label>
+												<input
+													id="vlm-edit-base-url"
+													type="text"
+													placeholder="https://api.openai.com/v1"
+													class={cn(
+														'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+														'focus:border-primary/20 focus:bg-base-100',
+														'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+														'peer [&:user-invalid]:border-error/50 [&:user-invalid]:focus:border-error/50',
+														'w-full'
+													)}
+													required
+													pattern="^https?://.*"
+													bind:value={config.vlm_config.base_url}
+												/>
+											</div>
+											<div class="form-control">
+												<label class="label" for="vlm-edit-system-prompt">
+													<span class="label-text">System Prompt</span>
+													<span class="label-text-alt">Instructions for the VLM model</span>
+												</label>
+												<textarea
+													id="vlm-edit-system-prompt"
+													class={cn(
+														'min-h-[80px] rounded-md border border-base-300 bg-base-200/50 px-3 py-2 text-sm transition-colors',
+														'focus:border-primary/20 focus:bg-base-100',
+														'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+														'w-full'
+													)}
+													placeholder="Describe the image accurately and concisely."
+													bind:value={config.vlm_config.system_prompt}
+												></textarea>
+											</div>
+											<div class="form-control">
+												<label class="label" for="vlm-edit-max-tokens">
+													<span class="label-text">Max Tokens ({config.vlm_config.max_tokens})</span>
+													<span class="label-text-alt">Maximum number of tokens to generate</span>
+												</label>
+												<input
+													id="vlm-edit-max-tokens"
+													type="number"
+													min="1"
+													step="1"
+													class={cn(
+														'h-9 rounded-md border border-base-300 bg-base-200/50 px-3 text-sm transition-colors',
+														'focus:border-primary/20 focus:bg-base-100',
+														'disabled:cursor-not-allowed disabled:bg-base-200 disabled:opacity-50',
+														'w-full'
+													)}
+													bind:value={config.vlm_config.max_tokens}
+												/>
+											</div>
+											<div class="form-control">
+												<label class="label" for="vlm-edit-temperature">
+													<span class="label-text">Temperature ({config.vlm_config.temperature})</span>
+													<span class="label-text-alt">Controls randomness</span>
+												</label>
+												<input
+													id="vlm-edit-temperature"
+													type="range"
+													min="0"
+													max="1"
+													step="0.1"
+													class="range range-xs"
+													bind:value={config.vlm_config.temperature}
+												/>
 											</div>
 										</div>
 									{/if}

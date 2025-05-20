@@ -41,7 +41,22 @@ export const userSettings = new RuneStore<{ value: Settings }>('settings', {
                     repetition_penalty: 1,
                 },
                 color: '#AECBFA',
-            },  
+            },
+            {
+                name: 'OpenAI VLM',
+                id: 4, // Ensure this ID is unique
+                shortcutKey: null,
+                type: 'vlm',
+                vlm_config: {
+                    model_name: 'gpt-4-vision-preview',
+                    api_key: 'YOUR_API_KEY_HERE', // Placeholder
+                    base_url: 'https://api.openai.com/v1',
+                    system_prompt: 'Describe the image.',
+                    max_tokens: 300,
+                    temperature: 0.7
+                },
+                color: '#4CAF50', // A nice green color, for example
+            }
         ],
         startAtLogin: false,
         playSound: true,
