@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { ocrOcrPost } from '@/python/client/sdk.gen';
+	import {
+		ocrOcr,
+		llmLlmOcr,
+		healthHealth,
+		shutdownShutdown,
+		logsGetLogs
+	} from '@/python/client/sdk.gen';
 	import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 	import { cubicOut, linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
@@ -76,7 +82,7 @@
 			let text: string | undefined;
 			if (config.type === 'nougat') {
 				text = await runWithTimeout(
-					ocrOcrPost({
+					ocrOcr({
 						body: {
 							filename: `file:///${filename}`,
 							model: config.nougat_config.hf_model_name,
@@ -84,7 +90,7 @@
 							top_p: config.nougat_config.top_p,
 							repetition_penalty: config.nougat_config.repetition_penalty
 						},
-						baseUrl: 'http://localhost:7771',
+						baseUrl: 'http://127.0.0.1:7771',
 						fetch: tauriFetch
 					}).then((res) => res.data),
 					DEFAULT_TIMEOUT
@@ -93,12 +99,8 @@
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
 			} else if (config.type === 'llm_endpoint') {
 				text = await runWithTimeout(
-					fetch('http://localhost:7771/llm/ocr', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
+					llmLlmOcr({
+						body: {
 							filename: `file:///${filename}`,
 							api_key: config.llm_config.api_key,
 							model: config.llm_config.model,
@@ -106,8 +108,10 @@
 							max_tokens: config.llm_config.max_tokens,
 							temperature: config.llm_config.temperature,
 							prompt: config.llm_config.prompt
-						})
-					}).then((res) => res.text()),
+						},
+						baseUrl: 'http://127.0.0.1:7771',
+						fetch: tauriFetch
+					}).then((res) => res.data),
 					DEFAULT_TIMEOUT
 				);
 			} else {

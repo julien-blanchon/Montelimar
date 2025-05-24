@@ -4,6 +4,37 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
+export type LLMOCRRequest = {
+    /**
+     * Filename or image data
+     */
+    filename?: string;
+    /**
+     * API key for the LLM service
+     */
+    api_key?: string;
+    /**
+     * Model name to use
+     */
+    model?: string;
+    /**
+     * LLM API endpoint URL
+     */
+    endpoint_url?: string;
+    /**
+     * Maximum tokens in response
+     */
+    max_tokens?: number;
+    /**
+     * Sampling temperature
+     */
+    temperature?: number;
+    /**
+     * Custom prompt for text extraction
+     */
+    prompt?: string;
+};
+
 export type OCRRequest = {
     /**
      * Filename
@@ -25,6 +56,10 @@ export type OCRRequest = {
      * Repetition penalty
      */
     repetition_penalty?: (number | null);
+    /**
+     * Padding
+     */
+    padding?: (number | null);
 };
 
 export type ValidationError = {
@@ -33,14 +68,30 @@ export type ValidationError = {
     type: string;
 };
 
-export type OcrOcrPostData = {
+export type LlmLlmOcrData = {
+    body: LLMOCRRequest;
+};
+
+export type LlmLlmOcrResponse = (string);
+
+export type LlmLlmOcrError = (HTTPValidationError);
+
+export type OcrOcrData = {
     body: OCRRequest;
 };
 
-export type OcrOcrPostResponse = (string);
+export type OcrOcrResponse = (string);
 
-export type OcrOcrPostError = (HTTPValidationError);
+export type OcrOcrError = (HTTPValidationError);
 
-export type HealthHealthGetResponse = (string);
+export type HealthHealthResponse = (string);
 
-export type HealthHealthGetError = unknown;
+export type HealthHealthError = unknown;
+
+export type ShutdownShutdownResponse = (string);
+
+export type ShutdownShutdownError = unknown;
+
+export type LogsGetLogsResponse = (string);
+
+export type LogsGetLogsError = unknown;

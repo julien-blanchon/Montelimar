@@ -20,7 +20,7 @@
 		"python:package:check": "bun ./check_build_needed.mjs",
 		"python:package:dev": "uv --directory src-python --project src-python run -m ocr_mlx.endpoint",
 		"python:package:generate-openapi": "uv --directory src-python --project src-python run -m ocr_mlx.export_openapi",
-		"python:package:generate-client": "bunx @hey-api/openapi-ts -i openapi.json -o src/lib/python/client -c @hey-api/client-fetch",
+		"python:package:generate-client": "bunx @hey-api/openapi-ts -i src-python/openapi.json -o src/lib/python/client -c @hey-api/client-fetch",
 		"icon:generate": "tauri icon src-tauri/icons/icon.svg",
 		"icon:generate-tray": "bash ./generate_icon_animation.sh src-tauri/icons/tray.png src-tauri/icons/frames/ 8"
 	},
