@@ -187,7 +187,7 @@ See `Contributing.md` for ways to get started.
 
 ## Authors
 
-- [@julienblanchon](https://x.com/JulienBlanchon)
+- [@julienblanchon](https://guybrush.ink/)
 
 ## Related
 

@@ -1,10 +1,10 @@
 [package]
 name = "montelimar"
-version = "0.2.1"
+version = "0.2.2"
 description = "Montelimar - OCR Simplified"
 authors = ["Julien Blanchon <julien@blanchon.cc>"]
 edition = "2021"
-homepage = "https://x.com/JulienBlanchon"
+homepage = "https://guybrush.ink/"
 license = "Apache License 2.0"
 keywords = ["ocr", "screenshot", "macos", "application", "menubar", "ai"]
 readme = "README.md"
