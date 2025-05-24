@@ -22,7 +22,7 @@
 	data-tauri-drag-region
 	class="flex h-screen w-screen items-center justify-center bg-transparent"
 >
-	<div data-tauri-drag-region class="flex w-full max-w-3xl items-center justify-center">
+	<div data-tauri-drag-region class="flex w-full max-w-full items-center justify-center">
 		<ModelSelection
 			actionFunction={(config) => {
 				emit('config-selected', config);

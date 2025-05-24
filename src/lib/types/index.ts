@@ -26,6 +26,15 @@ interface OCRInputConfig {
     allowed_chars?: string | null;
 }
 
+interface LLMInputConfig {
+    api_key: string;
+    model: string;
+    endpoint_url: string;
+    max_tokens: number;
+    temperature: number;
+    prompt: string;
+}
+
 export interface ConfigNougat {
     name: string;
     id: number;
@@ -44,7 +53,16 @@ export interface ConfigOCR {
     color: string;
 }
 
-export type Config = ConfigNougat | ConfigOCR;
+export interface ConfigLLMEndpoint {
+    name: string;
+    id: number;
+    shortcutKey: ShortcutKey | null;
+    type: 'llm_endpoint';
+    llm_config: LLMInputConfig;
+    color: string;
+}
+
+export type Config = ConfigNougat | ConfigOCR | ConfigLLMEndpoint;
 
 
 export interface Settings {

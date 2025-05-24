@@ -31,8 +31,8 @@
 					await register(shortcut, (event) => {
 						if (event.state === 'Pressed') {
 							console.log('Shortcut triggered', event);
-							if (recordingState.state) {
-								recordingState.state = false;
+							if (recordingState.isRecording) {
+								recordingState.isRecording = false;
 								return;
 							}
 							callback();

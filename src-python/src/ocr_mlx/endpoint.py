@@ -1,6 +1,4 @@
-import base64  # noqa: I001
 import datetime
-import io
 import logging
 import os
 import signal
@@ -14,21 +12,21 @@ from typing import Annotated, Any, cast
 
 import anyio
 import mlx.core as mx
-from mlx.core import clear_cache
 import pydantic
-import requests
 import uvicorn
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.routing import APIRoute
-from PIL import Image as PILImage
+from mlx.core import clear_cache
 from PIL import ImageOps
 from transformers.models.nougat.processing_nougat import NougatProcessor
 
 from ocr_mlx.inference.generate import generate
+from ocr_mlx.llm_endpoint import router as llm_router
 from ocr_mlx.model.nougat import Nougat
+from ocr_mlx.utils.image_utils import load_image
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -130,11 +128,14 @@ def custom_generate_unique_id(route: APIRoute):
 
 
 app = FastAPI(
-    title="Nougat OCR API",
-    description="OCR tool using the Nougat model",
+    title="OCR MLX API",
+    description="OCR tool using Nougat models and LLM vision capabilities",
     version="1.0.0",
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+# Include LLM router
+app.include_router(llm_router)
 
 origins = [
     "*",
@@ -146,23 +147,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def load_image(filename: str) -> PILImage.Image:
-    if filename.startswith("file://"):
-        return PILImage.open(filename[7:])
-    if filename.startswith(("http://", "https://")):
-        response = requests.get(filename, timeout=10)
-        response.raise_for_status()
-        return PILImage.open(io.BytesIO(response.content))
-    if filename.startswith("data:"):
-        header = "data:image/png;base64,"
-        base64_str = filename[len(header) :].replace("\n", "")
-        image_data = base64.b64decode(base64_str)
-        return PILImage.open(io.BytesIO(image_data))
-    msg = f"Unsupported image source: {filename}"
-    logger.error(msg)
-    raise ValueError(msg)
 
 
 class OCRRequest(pydantic.BaseModel):

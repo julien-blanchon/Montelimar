@@ -91,6 +91,25 @@
 				);
 			} else if (config.type === 'ocr') {
 				text = await runWithTimeout(runOCR(config, filename), DEFAULT_TIMEOUT);
+			} else if (config.type === 'llm_endpoint') {
+				text = await runWithTimeout(
+					fetch('http://localhost:7771/llm/ocr', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							filename: `file:///${filename}`,
+							api_key: config.llm_config.api_key,
+							model: config.llm_config.model,
+							endpoint_url: config.llm_config.endpoint_url,
+							max_tokens: config.llm_config.max_tokens,
+							temperature: config.llm_config.temperature,
+							prompt: config.llm_config.prompt
+						})
+					}).then((res) => res.text()),
+					DEFAULT_TIMEOUT
+				);
 			} else {
 				throw new Error('Invalid method');
 			}
