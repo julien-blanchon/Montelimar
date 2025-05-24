@@ -6,7 +6,7 @@ import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { changeTrayWithEasing } from "./tray";
 import { linear } from "svelte/easing";
-import { ocrOcrPost } from '@/python/client/sdk.gen';
+import { ocrOcr } from '@/python/client/sdk.gen';
 
 function arrayBufferToBase64(buffer: Uint8Array): string {
     let binary = '';
@@ -66,7 +66,7 @@ export async function requestScreenShot(filename: string, playSound: boolean): P
 }
 
 export async function runNougat(config: ConfigNougat, filename: string): Promise<string | undefined> {
-    const response = await ocrOcrPost({
+    const response = await ocrOcr({
         body: {
             filename: `file:///${filename}`,
             model: config.nougat_config.hf_model_name,

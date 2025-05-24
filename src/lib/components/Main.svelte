@@ -8,7 +8,7 @@
 	import { cn } from '@/utils';
 	import { userData } from '@/runes/user_database.svelte';
 	import { animatedTray } from '@/actions';
-	import { healthHealthGet } from '@/python/client/sdk.gen';
+	import { healthHealth } from '@/python/client/sdk.gen';
 	import HuggingfaceHubSelector from './custom/HuggingfaceHubSelector.svelte';
 	import { userSettings } from '@/runes/user_settings.svelte';
 

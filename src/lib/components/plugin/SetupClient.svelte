@@ -4,7 +4,7 @@
 
 	$effect(() => {
 		client.setConfig({
-			baseUrl: 'http://localhost:7771',
+			baseUrl: 'http://127.0.0.1:7771',
 			// fetch: fetch
 			fetch: tauriFetch
 		});
