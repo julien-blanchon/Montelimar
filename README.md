@@ -18,7 +18,7 @@ A OCR toolbox integrated in your mac
 
 ## Preview
 
-<video controls width="600" src="https://raw.githubusercontent.com/julien-blanchon/Montelimar/refs/heads/main/static/MontelimarDemo.mp4"></video>
+<video controls width="600" src="https://raw.githubusercontent.com/julien-blanchon/Silo/refs/heads/main/static/SiloDemo.mp4"></video>
 
 
 ## Features
@@ -59,15 +59,15 @@ A OCR toolbox integrated in your mac
 
 ## Installation
 
-To install Montelimar with Homebrew:
+To install Silo with Homebrew:
 ```shell
 # First add the homebrew tap
 brew tap julien-blanchon/homebrew-tap
-# Then install montelimar
-brew install --cask montelimar
+# Then install silo
+brew install --cask silo
 ```
 
-You can also manually download the .dmg in the [Github Release section](https://github.com/julien-blanchon/Montelimar/releases).
+You can also manually download the .dmg in the [Github Release section](https://github.com/julien-blanchon/Silo/releases).
 
 ## Getting Started
 
@@ -96,8 +96,8 @@ source .venv/bin/activate
 uv sync
 ```
 
-The Python sidecar (`ocr_mlx`) is packaged using box-packager, which:
-- Takes the entry point defined in pyproject.toml (`ocr_mlx.endpoint:main`)
+The Python sidecar (`backend`) is packaged using box-packager, which:
+- Takes the entry point defined in pyproject.toml (`backend.endpoint:main`)
 - Bundles all dependencies into a single executable
 - Places the executable in `src-tauri/binaries` with platform-specific naming
 - Uses PyApp to bootstrap the Python environment at runtime
