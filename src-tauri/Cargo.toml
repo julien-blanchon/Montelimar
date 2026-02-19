@@ -1,6 +1,6 @@
 [package]
 name = "montelimar"
-version = "0.2.3"
+version = "0.2.4"
 description = "Montelimar - OCR Simplified"
 authors = ["Julien Blanchon <julien@blanchon.cc>"]
 edition = "2021"
@@ -48,7 +48,7 @@ tauri-plugin-single-instance = "2"
 window-vibrancy = "0.6.0"
 ocrs = "0.10.3"
 image = "0.25.5"
-rten = { version = "0.18.0" }
+rten = { version = "0.21.0" }
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", rev = "9beeb789809eac7cc171c7405888fd309aebad64" }
 monitor = { git = "https://github.com/ahkohd/tauri-toolkit", rev = "f339123df704edd33dd235b9c41c8de9491778b1" }
 menubar = { git = "https://github.com/ahkohd/tauri-toolkit", rev = "f339123df704edd33dd235b9c41c8de9491778b1" }
